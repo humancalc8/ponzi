@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+.dash{
+  --ink:#15171C; --muted:#5E6470; --line:#D9DBE0; --paper:#FFFFFF; --white:#fff;
+  --green:#15171C; --green-2:#2D313B; --brass:#D9261C;
+  --serif:"Bricolage Grotesque","Hanken Grotesk",system-ui,sans-serif; --sans:"Hanken Grotesk",system-ui,sans-serif;
+  font-family:var(--sans); color:var(--ink); line-height:1.6;
+  max-width:1160px; margin:0 auto; padding:48px 28px 80px;
+}
+.dash *{box-sizing:border-box}
+.dash h1{font-family:var(--serif); font-weight:500; margin:0; letter-spacing:-.01em; line-height:1.15; font-size:clamp(30px,4vw,42px)}
+.dash p{margin:0}
+.dash :focus-visible{outline:2px solid var(--brass); outline-offset:3px}
+
+.dash .top{display:flex; justify-content:space-between; align-items:flex-end; gap:24px; flex-wrap:wrap; margin-bottom:32px}
+.dash .top p{margin-top:8px; color:var(--muted)}
+.dash .btn{display:inline-block; background:var(--green); color:#fff; font-weight:600; text-decoration:none;
+  padding:13px 24px; border-radius:6px; transition:background .2s}
+.dash .btn:hover{background:var(--green-2)}
+
+/* table */
+.dash .table-wrap{background:var(--white); border:1px solid var(--line); border-radius:10px; overflow:hidden}
+.dash table{width:100%; border-collapse:collapse; font-size:15px}
+.dash th{text-align:left; font-weight:500; font-size:13.5px; color:var(--muted); background:#F3F4F6;
+  padding:14px 24px; border-bottom:1px solid var(--line); white-space:nowrap}
+.dash td{padding:20px 24px; border-bottom:1px solid var(--line); vertical-align:middle}
+.dash tbody tr:last-child td{border-bottom:0}
+.dash tbody tr:hover td{background:#FAFAFB}
+.dash th.num,.dash td.num{text-align:right}
+.dash td.ref{font-weight:600; font-variant-numeric:tabular-nums}
+.dash td.num,.dash td.date{font-variant-numeric:tabular-nums; white-space:nowrap}
+.dash td.val{font-family:var(--serif); font-size:20px; color:var(--green)}
+.dash td i{font-style:normal; font-size:13px; color:var(--muted); margin-right:5px}
+
+.dash .status{display:inline-block; font-size:13px; font-weight:600; padding:4px 12px; border-radius:99px;
+  background:#F0F1F3; color:var(--green); white-space:nowrap}
+.dash .s-pending,.dash .s-listed{background:#FCE9E7; color:#9B1B13}
+.dash .s-sold,.dash .s-cancelled,.dash .s-closed{background:#EEF0EE; color:var(--muted)}
+
+.dash .empty{text-align:center; padding:52px 24px; color:var(--muted)}
+.dash .empty a{color:var(--green); font-weight:600; text-underline-offset:4px}
+.dash .fineprint{margin-top:16px; font-size:13.5px; color:var(--muted); max-width:70ch}
+
+/* mobile: each holding becomes a stacked record */
+@media (max-width:820px){
+  .dash{padding:36px 20px 64px}
+  .dash thead{position:absolute; left:-9999px}
+  .dash table,.dash tbody,.dash tr,.dash td{display:block; width:100%}
+  .dash tr{padding:18px 20px; border-bottom:1px solid var(--line)}
+  .dash tbody tr:last-child{border-bottom:0}
+  .dash td{display:flex; justify-content:space-between; gap:16px; padding:6px 0; border:0; text-align:right}
+  .dash td::before{content:attr(data-label); color:var(--muted); font-size:13.5px; text-align:left}
+  .dash td.empty{display:block; padding:40px 0}
+  .dash td.empty::before{content:none}
+  .dash th.num,.dash td.num{text-align:right}
+}
+</style>
+
+<div class="dash">
+
+  <header class="top">
+    <div>
+      <h1>Bought shares</h1>
+      <p>Individual confirmed holdings and maturity status.</p>
+    </div>
+    <a class="btn" href="{% url 'buy' %}">New request</a>
+  </header>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Reference</th>
+          <th class="num">Principal</th>
+          <th>Class</th>
+          <th>Maturity date</th>
+          <th class="num">Expected value*</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for h in holdings %}
+          <tr>
+            <td class="ref" data-label="Reference">{{ h.reference|truncatechars:15 }}</td>
+            <td class="num" data-label="Principal"><span><i>KSh</i>{{ h.principal|floatformat:2 }}</span></td>
+            <td data-label="Class">{{ h.days_snapshot }} days</td>
+            <td class="date" data-label="Maturity date">{{ h.maturity_at|date:"d M Y, H:i" }}</td>
+            <td class="num val" data-label="Expected value*"><span><i>KSh</i>{{ h.maturity_value|floatformat:2 }}</span></td>
+            <td data-label="Status"><span class="status s-{{ h.status|slugify }}">{{ h.get_status_display }}</span></td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" class="empty">
+              No confirmed holdings yet. <a href="{% url 'buy' %}">Submit a request</a> during an open session to get started.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <p class="fineprint">*Illustrative calculation only. It is not a promise or guarantee of return.</p>
+
+</div>
+
+{% endblock %}

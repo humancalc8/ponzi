@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+.dash{
+  --ink:#15171C; --muted:#5E6470; --line:#D9DBE0; --paper:#FFFFFF; --white:#fff;
+  --green:#15171C; --green-2:#2D313B; --brass:#D9261C;
+  --serif:"Bricolage Grotesque","Hanken Grotesk",system-ui,sans-serif; --sans:"Hanken Grotesk",system-ui,sans-serif;
+  font-family:var(--sans); color:var(--ink); line-height:1.6;
+  max-width:1160px; margin:0 auto; padding:48px 28px 80px;
+}
+.dash *{box-sizing:border-box}
+.dash h1,.dash h2{font-family:var(--serif); font-weight:500; margin:0; letter-spacing:-.01em; line-height:1.15}
+.dash p{margin:0}
+.dash a{color:inherit}
+.dash :focus-visible{outline:2px solid var(--brass); outline-offset:3px}
+
+/* header */
+.dash .top{display:flex; justify-content:space-between; align-items:flex-end; gap:24px; flex-wrap:wrap; margin-bottom:36px}
+.dash .top h1{font-size:clamp(30px,4vw,42px)}
+.dash .top p{margin-top:8px; color:var(--muted)}
+.dash .btn{display:inline-block; background:var(--green); color:#fff; font-weight:600; text-decoration:none;
+  padding:13px 24px; border-radius:6px; transition:background .2s}
+.dash .btn:hover{background:var(--green-2)}
+
+/* balance band: one strip, one emphasised figure */
+.dash .band{display:grid; grid-template-columns:1.4fr 1fr 1fr; background:var(--green); color:#fff; border-radius:10px; overflow:hidden}
+.dash .metric{padding:32px 36px}
+.dash .metric + .metric{border-left:1px solid rgba(255,255,255,.14)}
+.dash .metric span{font-size:14px; color:#9298A5}
+.dash .metric strong{display:block; font-family:var(--serif); font-weight:500; font-size:34px; line-height:1.15; margin:8px 0 6px; font-variant-numeric:tabular-nums}
+.dash .metric:first-child strong{font-size:44px}
+.dash .metric small{font-size:13.5px; color:#C4C8D0}
+.dash .cur{font-size:.55em; color:#FFFFFF; margin-right:6px; letter-spacing:.02em}
+
+/* body */
+.dash .grid{display:grid; grid-template-columns:1.6fr 1fr; gap:32px; margin-top:32px; align-items:start}
+.dash .card{background:var(--white); border:1px solid var(--line); border-radius:10px}
+.dash .card-head{display:flex; justify-content:space-between; align-items:baseline; padding:24px 32px 18px}
+.dash .card-head h2{font-size:24px}
+.dash .card-head a{font-size:14.5px; color:var(--green); text-underline-offset:4px}
+
+.dash .row{display:flex; justify-content:space-between; align-items:center; gap:20px; padding:20px 32px; border-top:1px solid var(--line)}
+.dash .row b{display:block; font-weight:600}
+.dash .row small{display:block; color:var(--muted); font-size:13.5px; margin-top:2px}
+.dash .row .amt{font-family:var(--serif); font-size:22px; white-space:nowrap; font-variant-numeric:tabular-nums}
+.dash .row .amt i{font-style:normal; font-family:var(--sans); font-size:13px; color:var(--muted); margin-right:5px}
+
+.dash .empty{padding:44px 32px 48px; border-top:1px solid var(--line); text-align:center}
+.dash .empty p{color:var(--muted); max-width:40ch; margin:0 auto 18px}
+.dash .empty a{color:var(--green); font-weight:600; text-underline-offset:4px}
+
+/* quick actions */
+.dash .actions h2{font-size:24px; padding:24px 28px 18px}
+.dash .action{display:flex; gap:16px; align-items:center; padding:18px 28px; border-top:1px solid var(--line);
+  text-decoration:none; transition:background .15s}
+.dash .action:hover{background:#F6F7F8}
+.dash .action:last-child{border-radius:0 0 10px 10px}
+.dash .ico{flex:none; width:40px; height:40px; border-radius:8px; background:#F0F1F3; color:var(--green); display:grid; place-items:center}
+.dash .ico svg{width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round}
+.dash .action b{display:block; font-weight:600}
+.dash .action small{display:block; color:var(--muted); font-size:13.5px; line-height:1.4}
+
+@media (max-width:900px){
+  .dash{padding:36px 20px 64px}
+  .dash .band{grid-template-columns:1fr}
+  .dash .metric + .metric{border-left:0; border-top:1px solid rgba(255,255,255,.14)}
+  .dash .grid{grid-template-columns:1fr}
+}
+@media (max-width:520px){
+  .dash .row,.dash .card-head{padding-left:20px; padding-right:20px}
+  .dash .metric{padding:26px 22px}
+}
+</style>
+
+<div class="dash">
+
+  <header class="top">
+    <div>
+      <h1>Good to see you, {{ user.username }}.</h1>
+      <p>Here is your current account activity.</p>
+    </div>
+    <a class="btn" href="{% url 'buy' %}">Submit a bid</a>
+  </header>
+
+  <!-- BALANCES -->
+  <section class="band" aria-label="Account summary">
+    <div class="metric">
+      <span>Active holdings</span>
+      <strong><span class="cur">KSh</span>{{ active_total|floatformat:2 }}</strong>
+      <small>Original principal</small>
+    </div>
+    <div class="metric">
+      <span>Matured balance pending</span>
+      <strong><span class="cur">KSh</span>{{ matured_total|floatformat:2 }}</strong>
+      <small>Available and unallocated</small>
+    </div>
+    <div class="metric">
+      <span>Allocations</span>
+      <strong>{{ allocation_count }}</strong>
+      <small>Buyer and seller matches</small>
+    </div>
+  </section>
+
+  <div class="grid">
+
+    <!-- RECENT HOLDINGS -->
+    <section class="card">
+      <div class="card-head">
+        <h2>Recent holdings</h2>
+        <a href="{% url 'bought' %}">View all holdings</a>
+      </div>
+
+      {% for h in holdings %}
+        <div class="row">
+          <div>
+            <b>{{ h.purchase.package.name }}</b>
+            <small>Ref {{ h.reference|truncatechars:18 }}, matures {{ h.maturity_at|date:"d M Y, H:i" }}</small>
+          </div>
+          <div class="amt"><i>KSh</i>{{ h.maturity_value|floatformat:2 }}</div>
+        </div>
+      {% empty %}
+        <div class="empty">
+          <p>You have no holdings yet. Once a purchase is confirmed, it will show up here with its maturity date.</p>
+          <a href="{% url 'buy' %}">Submit your first bid</a>
+        </div>
+      {% endfor %}
+    </section>
+
+    <!-- QUICK ACTIONS -->
+    <section class="card actions">
+      <h2>Quick actions</h2>
+
+      <a class="action" href="{% url 'buy' %}">
+        <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg></span>
+        <span><b>Buy shares</b><small>Submit a request in an open session</small></span>
+      </a>
+
+      <a class="action" href="{% url 'bought' %}">
+        <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+        <span><b>Bought shares</b><small>Track maturity countdowns</small></span>
+      </a>
+
+      <a class="action" href="{% url 'sold' %}">
+        <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h14l-3-3M20 16H6l3 3"/></svg></span>
+        <span><b>Sold shares</b><small>Review allocations and payments</small></span>
+      </a>
+    </section>
+
+  </div>
+</div>
+
+{% endblock %}

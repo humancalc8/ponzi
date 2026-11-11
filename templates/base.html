@@ -1,0 +1,1389 @@
+
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#15171C">
+  <title>{% block title %}ShareFlow | Peer-to-peer share bidding{% endblock %}</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script defer src="{% static 'js/app.js' %}"></script>
+
+  <style>
+  :root {
+    --sf-ink: #15171C;
+    --sf-muted: #5E6470;
+    --sf-line: #D9DBE0;
+    --sf-paper: #FFFFFF;
+    --sf-white: #fff;
+    --sf-green: #15171C;
+    --sf-green-2: #2D313B;
+    --sf-brass: #D9261C;
+    --sf-brass-soft: #FFFFFF;
+    --sf-serif: "Bricolage Grotesque", "Hanken Grotesk", system-ui, sans-serif;
+    --sf-sans: "Hanken Grotesk", system-ui, sans-serif;
+    --sf-header: 68px;
+  }
+
+  html {
+    scroll-padding-top: calc(var(--sf-header) + 16px);
+  }
+
+  html.sf-lock,
+  html.sf-lock body {
+    overflow: hidden;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--sf-paper);
+    color: var(--sf-ink);
+    font-family: var(--sf-sans);
+    overflow-x: clip;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .sf-main {
+    flex: 1 0 auto;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+
+  .sf-ico {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex: none;
+  }
+
+  .sf-skip {
+    position: absolute;
+    left: -9999px;
+    top: 8px;
+    background: var(--sf-green);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 6px;
+    z-index: 200;
+  }
+
+  .sf-skip:focus {
+    left: 12px;
+  }
+
+  .sf-header :focus-visible,
+  .sf-footer :focus-visible,
+  .sf-cookie :focus-visible,
+  .sf-skip:focus-visible {
+    outline: 2px solid var(--sf-brass);
+    outline-offset: 3px;
+  }
+
+  /* ---------- header ---------- */
+
+  .sf-header {
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    min-height: var(--sf-header);
+    background: var(--sf-white);
+    border-bottom: 1px solid var(--sf-line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 max(28px, calc((100vw - 1160px)/2 + 28px));
+  }
+
+  .sf-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--sf-ink);
+    font-family: var(--sf-serif);
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -.04em;
+    flex: none;
+  }
+
+  .sf-mark {
+    display: grid;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--sf-green);
+    color: var(--sf-brass-soft);
+    place-items: center;
+    font-family: var(--sf-serif);
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  .sf-nav {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .sf-nav a,
+  .sf-nav .sf-linkbtn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    text-decoration: none;
+    color: var(--sf-muted);
+    font: 500 15px/1 var(--sf-sans);
+    padding: 10px 12px;
+    border-radius: 6px;
+    transition: color .15s;
+  }
+
+  .sf-nav a:hover,
+  .sf-nav .sf-linkbtn:hover {
+    color: var(--sf-ink);
+  }
+
+  .sf-nav a[aria-current="page"] {
+    color: var(--sf-green);
+  }
+
+  .sf-nav a[aria-current="page"]::after {
+    content: "";
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 2px;
+    height: 2px;
+    background: var(--sf-brass);
+    border-radius: 2px;
+  }
+
+  .sf-nav .sf-ico,
+  .sf-nav-head,
+  .sf-nav-foot {
+    display: none;
+  }
+
+  .sf-nav form {
+    margin: 0;
+  }
+
+  .sf-linkbtn {
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+
+  .sf-nav .sf-cta {
+    background: var(--sf-green);
+    color: #fff;
+    padding: 11px 18px;
+    margin-left: 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: background .2s;
+  }
+
+  .sf-nav .sf-cta:hover {
+    background: var(--sf-green-2);
+    color: #fff;
+  }
+
+  .sf-nav .sf-out {
+    border: 1px solid var(--sf-line);
+    margin-left: 10px;
+    padding: 10px 16px;
+    color: var(--sf-ink);
+  }
+
+  .sf-nav .sf-out:hover {
+    border-color: var(--sf-green);
+    color: var(--sf-green);
+  }
+
+  
+/* ---------- notification bell ---------- */
+
+.sf-notification {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+}
+
+.sf-notification-btn {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  background: #fff;
+  color: var(--sf-ink);
+  border: 1px solid var(--sf-line);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .2s, border-color .2s;
+}
+
+.sf-notification-btn:hover {
+  background: #F6F7F8;
+  border-color: var(--sf-green);
+}
+
+.sf-notification-btn .sf-ico {
+  display: block;
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+
+.sf-notification-dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--sf-brass);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  top: 7px;
+  right: 7px;
+}
+
+.sf-notification-panel {
+  position: absolute;
+  top: calc(100% + 14px);
+  right: 0;
+  width: min(340px, calc(100vw - 40px));
+  box-sizing: border-box;
+  background: #fff;
+  border: 1px solid var(--sf-line);
+  border-radius: 12px;
+  box-shadow: 0 18px 45px rgba(0,0,0,.13);
+  padding: 20px;
+  z-index: 110;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: opacity .2s, transform .2s, visibility .2s;
+}
+
+.sf-notification-panel.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.sf-notification-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--sf-line);
+}
+
+.sf-notification-heading strong {
+  font-size: 16px;
+}
+
+.sf-notification-heading span {
+  font-size: 11px;
+  color: var(--sf-muted);
+}
+
+.sf-notification-content {
+  display: flex;
+  gap: 13px;
+  padding-top: 19px;
+  align-items: flex-start;
+}
+
+.sf-notification-icon {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: #FCE9E7;
+  color: #B01F16;
+}
+
+.sf-notification-icon .sf-ico {
+  width: 21px;
+  height: 21px;
+}
+
+.sf-notification-content h3 {
+  margin: 0 0 7px;
+  font-size: 14px;
+}
+
+.sf-notification-content p {
+  margin: 0;
+  color: var(--sf-muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.sf-notification-close {
+  display: block;
+  width: 100%;
+  margin-top: 18px;
+  padding: 10px;
+  background: #F5F6F7;
+  border: 1px solid var(--sf-line);
+  border-radius: 7px;
+  color: var(--sf-ink);
+  font: 600 13px var(--sf-sans);
+  cursor: pointer;
+}
+
+.sf-notification-close:hover {
+  background: #ECEEF0;
+}
+
+  /* ---------- mobile menu ---------- */
+
+  .sf-burger {
+    display: none;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--sf-line);
+    background: var(--sf-white);
+    border-radius: 8px;
+    color: var(--sf-ink);
+    cursor: pointer;
+    place-items: center;
+  }
+
+  .sf-scrim {
+    position: fixed;
+    inset: 0;
+    background: rgba(8,28,22,.55);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .3s, visibility 0s .3s;
+    z-index: 69;
+  }
+
+  @media (max-width: 960px) {
+    .sf-header {
+      padding: 0 20px;
+    }
+
+    .sf-burger {
+      display: grid;
+    }
+
+    .sf-nav {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: min(86vw,340px);
+      background: var(--sf-white);
+      z-index: 70;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      padding: 0 0 env(safe-area-inset-bottom,0px);
+      transform: translateX(100%);
+      visibility: hidden;
+      transition: transform .32s cubic-bezier(.22,.8,.3,1), visibility 0s .32s;
+      box-shadow: -24px 0 48px -24px rgba(0,0,0,.35);
+      overflow-y: auto;
+    }
+
+    .sf-nav.is-open {
+      transform: none;
+      visibility: visible;
+      transition: transform .32s cubic-bezier(.22,.8,.3,1);
+    }
+
+    .sf-scrim.is-open {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity .3s;
+    }
+
+    .sf-nav-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: var(--sf-header);
+      padding: 0 16px 0 20px;
+      border-bottom: 1px solid var(--sf-line);
+      flex: none;
+    }
+
+    .sf-nav-head .sf-brand {
+      font-size: 23px;
+    }
+
+    .sf-close {
+      width: 44px;
+      height: 44px;
+      border: 0;
+      background: none;
+      border-radius: 8px;
+      color: var(--sf-ink);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+
+    .sf-nav .sf-ico {
+      display: block;
+    }
+
+    .sf-nav a,
+    .sf-nav .sf-linkbtn {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 16px 20px;
+      font-size: 16px;
+      color: var(--sf-ink);
+      border-radius: 0;
+      border-bottom: 1px solid var(--sf-line);
+    }
+
+    .sf-nav a .sf-ico,
+    .sf-nav .sf-linkbtn .sf-ico {
+      width: 38px;
+      height: 38px;
+      padding: 9px;
+      border-radius: 8px;
+      background: #F0F1F3;
+      color: var(--sf-green);
+      box-sizing: border-box;
+    }
+
+    .sf-nav a[aria-current="page"] {
+      background: #F6F7F8;
+    }
+
+    .sf-nav a[aria-current="page"]::after {
+      display: none;
+    }
+
+    .sf-nav .sf-cta,
+    .sf-nav .sf-out {
+      margin: 0;
+      border-radius: 0;
+      background: none;
+      border: 0;
+      border-bottom: 1px solid var(--sf-line);
+      color: var(--sf-ink);
+      padding: 16px 20px;
+    }
+
+    .sf-nav .sf-cta:hover {
+      background: none;
+      color: var(--sf-ink);
+    }
+
+    .sf-nav form {
+      width: 100%;
+    }
+
+    .sf-nav-foot {
+      display: block;
+      margin-top: auto;
+      padding: 20px;
+      font-size: 13.5px;
+      color: var(--sf-muted);
+      line-height: 1.5;
+    }
+
+    /* Bell sits inside the mobile drawer, before logout. */
+    .sf-notification {
+      display: block;
+      margin: 0;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--sf-line);
+    }
+
+    .sf-notification-btn {
+      width: 100%;
+      height: auto;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 14px;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      font: 500 16px var(--sf-sans);
+    }
+
+    .sf-notification-btn::after {
+      content: "Notifications";
+    }
+
+    .sf-notification-btn .sf-ico {
+      width: 38px;
+      height: 38px;
+      padding: 9px;
+      border-radius: 8px;
+      background: #F0F1F3;
+      box-sizing: border-box;
+    }
+
+    .sf-notification-btn:hover {
+      background: transparent;
+    }
+
+    .sf-notification-dot {
+      top: 7px;
+      left: 27px;
+      right: auto;
+    }
+
+    .sf-notification-panel {
+      position: relative;
+      top: auto;
+      right: auto;
+      width: auto;
+      margin-top: 12px;
+      box-shadow: none;
+      border-radius: 8px;
+    }
+  }
+
+  /* ---------- messages ---------- */
+
+  .sf-messages {
+    max-width: 1160px;
+    margin: 24px auto 0;
+    padding: 0 28px;
+    display: grid;
+    gap: 10px;
+  }
+
+  .sf-msg {
+    background: var(--sf-white);
+    border: 1px solid var(--sf-line);
+    border-left: 4px solid var(--sf-green);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 15px;
+  }
+
+  .sf-msg.error,
+  .sf-msg.danger {
+    border-left-color: #B3402F;
+  }
+
+  .sf-msg.warning {
+    border-left-color: var(--sf-brass);
+  }
+
+  .sf-msg.info,
+  .sf-msg.debug {
+    border-left-color: #4C7C96;
+  }
+
+  @media (max-width:560px) {
+    .sf-messages {
+      padding: 0 20px;
+    }
+  }
+
+  /* ---------- footer ---------- */
+
+  .sf-footer {
+    flex: none;
+    background: var(--sf-green);
+    color: #C4C8D0;
+    margin-top: 96px;
+  }
+
+  .sf-foot-in {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 64px 28px 40px;
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    gap: 48px;
+  }
+
+  .sf-footer .sf-brand {
+    color: #fff;
+  }
+
+  .sf-footer .sf-mark {
+    background: #fff;
+    color: var(--sf-green);
+  }
+
+  .sf-foot-about p {
+    margin: 18px 0 0;
+    max-width: 36ch;
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  .sf-social {
+    display: flex;
+    gap: 10px;
+    margin-top: 26px;
+  }
+
+  .sf-social a {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.22);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    transition: background .2s, border-color .2s, color .2s;
+  }
+
+  .sf-social a:hover {
+    background: var(--sf-brass-soft);
+    border-color: var(--sf-brass-soft);
+    color: var(--sf-green);
+  }
+
+  .sf-social .sf-ico {
+    width: 18px;
+    height: 18px;
+  }
+
+  .sf-footer h2 {
+    margin: 4px 0 18px;
+    font: 600 14px/1.2 var(--sf-sans);
+    color: #fff;
+    letter-spacing: .01em;
+  }
+
+  .sf-footer ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+  }
+
+  .sf-footer ul a {
+    color: #C4C8D0;
+    text-decoration: none;
+    font-size: 15px;
+    transition: color .15s;
+  }
+
+  .sf-footer ul a:hover {
+    color: #fff;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  .sf-foot-bar {
+    border-top: 1px solid rgba(255,255,255,.14);
+  }
+
+  .sf-foot-bar > div {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 22px 28px calc(22px + env(safe-area-inset-bottom,0px));
+    display: flex;
+    justify-content: space-between;
+    gap: 12px 32px;
+    flex-wrap: wrap;
+    font-size: 13.5px;
+    color: #9298A5;
+  }
+
+  @media (max-width:900px) {
+    .sf-foot-in {
+      grid-template-columns: 1fr 1fr;
+      gap: 40px 32px;
+      padding: 52px 20px 32px;
+    }
+
+    .sf-foot-about {
+      grid-column: 1 / -1;
+    }
+
+    .sf-foot-bar > div {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+  }
+
+  @media (max-width:420px) {
+    .sf-foot-in {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ---------- cookie notice ---------- */
+
+  .sf-cookie {
+    position: fixed;
+    left: 24px;
+    bottom: 24px;
+    width: min(420px, calc(100vw - 48px));
+    z-index: 90;
+    background: var(--sf-white);
+    border: 1px solid var(--sf-line);
+    border-radius: 12px;
+    padding: 22px 22px 20px;
+    box-shadow: 0 24px 48px -16px rgba(8,28,22,.35);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(16px);
+    transition: opacity .35s, transform .35s, visibility 0s .35s;
+  }
+
+  .sf-cookie.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: opacity .35s, transform .35s;
+  }
+
+  .sf-cookie-top {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .sf-cookie .tile {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: #FCE9E7;
+    color: #B01F16;
+    display: grid;
+    place-items: center;
+  }
+
+  .sf-cookie h2 {
+    margin: 0 0 6px;
+    font: 500 20px/1.2 var(--sf-serif);
+  }
+
+  .sf-cookie p {
+    margin: 0;
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--sf-muted);
+  }
+
+  .sf-cookie p a {
+    color: var(--sf-green);
+    text-underline-offset: 3px;
+  }
+
+  .sf-cookie-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .sf-cookie-actions button {
+    flex: 1;
+    font: 600 14.5px/1 var(--sf-sans);
+    padding: 13px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background .2s, border-color .2s;
+  }
+
+  .sf-cookie .accept {
+    background: var(--sf-green);
+    color: #fff;
+    border: 1px solid var(--sf-green);
+  }
+
+  .sf-cookie .accept:hover {
+    background: var(--sf-green-2);
+  }
+
+  .sf-cookie .essential {
+    background: var(--sf-white);
+    color: var(--sf-ink);
+    border: 1px solid var(--sf-line);
+  }
+
+  .sf-cookie .essential:hover {
+    border-color: var(--sf-green);
+  }
+
+  @media (max-width:560px) {
+    .sf-cookie {
+      left: 12px;
+      right: 12px;
+      bottom: calc(12px + env(safe-area-inset-bottom,0px));
+      width: auto;
+      padding: 18px;
+    }
+
+    .sf-cookie .tile {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion:reduce) {
+    .sf-nav,
+    .sf-scrim,
+    .sf-cookie,
+    .sf-notification-panel {
+      transition: none !important;
+    }
+  }
+  </style>
+
+  {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+
+<!-- ICON SPRITE -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-dash" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></symbol>
+  <symbol id="i-buy" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></symbol>
+  <symbol id="i-bought" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/></symbol>
+  <symbol id="i-sold" viewBox="0 0 24 24"><path d="M4 8h14l-3-3M20 16H6l3 3"/></symbol>
+  <symbol id="i-tx" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
+  <symbol id="i-login" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></symbol>
+  <symbol id="i-signup" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></symbol>
+  <symbol id="i-cookie" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9 4 4 0 0 0 4 4 4 4 0 0 0 5 5z"/><path d="M8.5 10.5h.01M12 15.5h.01M15.5 13h.01M8 15h.01"/></symbol>
+  <symbol id="i-fb" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></symbol>
+  <symbol id="i-ig" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.4A4 4 0 1 1 12.6 8 4 4 0 0 1 16 11.4z"/><path d="M17.5 6.5h.01"/></symbol>
+  <symbol id="i-in" viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></symbol>
+  <symbol id="i-wa" viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z"/></symbol>
+  <symbol id="i-xlogo" viewBox="0 0 24 24"><path d="M18.9 2H22l-7.2 8.2L23 22h-6.6l-5.2-6.8L5.2 22H2l7.7-8.8L1.5 2h6.7l4.7 6.2zm-1.2 18h1.8L7.2 3.9H5.3z" style="fill:currentColor;stroke:none"/></symbol>
+</svg>
+
+<a class="sf-skip" href="#main">Skip to content</a>
+
+{% with current=request.resolver_match.url_name %}
+<header class="sf-header">
+
+  <a class="sf-brand" href="{% url 'home' %}">
+    <span class="sf-mark">S</span>ShareFlow
+  </a>
+
+  <button class="sf-burger" id="sf-open" type="button"
+          aria-label="Open menu" aria-controls="sf-nav" aria-expanded="false">
+    <svg class="sf-ico" aria-hidden="true"><use href="#i-menu"/></svg>
+  </button>
+
+  <div class="sf-scrim" id="sf-scrim"></div>
+
+  <nav class="sf-nav" id="sf-nav" aria-label="Main">
+
+    <div class="sf-nav-head">
+      <a class="sf-brand" href="{% url 'home' %}" style="border:0;padding:0;width:auto">
+        <span class="sf-mark">S</span>ShareFlow
+      </a>
+      <button class="sf-close" id="sf-close" type="button" aria-label="Close menu">
+        <svg class="sf-ico" aria-hidden="true"><use href="#i-x"/></svg>
+      </button>
+    </div>
+
+    <a href="{% url 'home' %}" {% if current == 'home' %}aria-current="page"{% endif %}>
+      <svg class="sf-ico" aria-hidden="true"><use href="#i-home"/></svg>
+      Overview
+    </a>
+
+    {% if user.is_authenticated %}
+
+      <a href="{% url 'dashboard' %}" {% if current == 'dashboard' %}aria-current="page"{% endif %}>
+        <svg class="sf-ico" aria-hidden="true"><use href="#i-dash"/></svg>
+        Dashboard
+      </a>
+
+      <a href="{% url 'buy' %}" {% if current == 'buy' %}aria-current="page"{% endif %}>
+        <svg class="sf-ico" aria-hidden="true"><use href="#i-buy"/></svg>
+        Buy shares
+      </a>
+
+      <a href="{% url 'bought' %}" {% if current == 'bought' %}aria-current="page"{% endif %}>
+        <svg class="sf-ico" aria-hidden="true"><use href="#i-bought"/></svg>
+        Bought
+      </a>
+
+      <a href="{% url 'sold' %}" {% if current == 'sold' %}aria-current="page"{% endif %}>
+        <svg class="sf-ico" aria-hidden="true"><use href="#i-sold"/></svg>
+        Sold
+      </a>
+
+      <a href="{% url 'marketplace' %}">
+        Marketplace
+      </a>
+
+      <a href="{% url 'transactions' %}" {% if current == 'transactions' %}aria-current="page"{% endif %}>
+        <svg class="sf-ico" aria-hidden="true"><use href="#i-tx"/></svg>
+        Transactions
+      </a>
+
+      <!-- NOTIFICATION BELL: RIGHT BEFORE LOG OUT -->
+      <div class="sf-notification">
+
+        <button
+          type="button"
+          class="sf-notification-btn"
+          id="sf-notification-btn"
+          aria-label="Notifications"
+          aria-expanded="false"
+          aria-controls="sf-notification-panel"
+        >
+          <svg class="sf-ico" aria-hidden="true">
+            <use href="#i-bell"/>
+          </svg>
+          <span class="sf-notification-dot" aria-hidden="true"></span>
+        </button>
+
+        <div
+          class="sf-notification-panel"
+          id="sf-notification-panel"
+          role="region"
+          aria-label="Notifications"
+          aria-hidden="true"
+        >
+          <div class="sf-notification-heading">
+            <strong>Notifications</strong>
+            <span>ShareFlow updates</span>
+          </div>
+
+          <div class="sf-notification-content">
+            <div class="sf-notification-icon">
+              <svg class="sf-ico" aria-hidden="true">
+                <use href="#i-bell"/>
+              </svg>
+            </div>
+
+            <div>
+              <h3>You're in the right place.</h3>
+              <p>
+                New listings and system updates will be available here.
+                Check back regularly to stay informed.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="sf-notification-close"
+            id="sf-notification-close"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+
+      <!-- LOG OUT: LAST ITEM ON THE RIGHT -->
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button class="sf-linkbtn sf-out" type="submit">
+          <svg class="sf-ico" aria-hidden="true"><use href="#i-logout"/></svg>
+          Log out
+        </button>
+      </form>
+
+    {% else %}
+
+      <a href="{% url 'login' %}" {% if current == 'login' %}aria-current="page"{% endif %}>
+        <svg class="sf-ico" aria-hidden="true"><use href="#i-login"/></svg>
+        Log in
+      </a>
+
+      <a class="sf-cta" href="{% url 'register' %}">
+        <svg class="sf-ico" aria-hidden="true"><use href="#i-signup"/></svg>
+        Create account
+      </a>
+
+    {% endif %}
+
+    <div class="sf-nav-foot">
+      Bidding sessions run at 8:00 AM and 8:00 PM, East Africa Time.
+    </div>
+
+  </nav>
+</header>
+{% endwith %}
+
+<main class="sf-main" id="main">
+
+  {% if messages %}
+    <div class="sf-messages" role="status">
+      {% for message in messages %}
+        <div class="sf-msg {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+
+</main>
+
+<!-- FOOTER -->
+
+{% url 'faq' as faq_url %}
+{% url 'help' as help_url %}
+{% url 'contact' as contact_url %}
+{% url 'privacy' as privacy_url %}
+{% url 'terms' as terms_url %}
+{% url 'cookies' as cookies_url %}
+
+<footer class="sf-footer">
+
+  <div class="sf-foot-in">
+
+    <div class="sf-foot-about">
+      <a class="sf-brand" href="{% url 'home' %}">
+        <span class="sf-mark">S</span>ShareFlow
+      </a>
+
+      <p>
+        A peer-to-peer platform for bidding on shares in scheduled sessions
+        and trading them between members, with every step on record.
+      </p>
+
+      <div class="sf-social">
+        <a href="https://x.com/" target="_blank" rel="noopener noreferrer" aria-label="ShareFlow on X">
+          <svg class="sf-ico" aria-hidden="true"><use href="#i-xlogo"/></svg>
+        </a>
+        <a href="https://facebook.com/" target="_blank" rel="noopener noreferrer" aria-label="ShareFlow on Facebook">
+          <svg class="sf-ico" aria-hidden="true"><use href="#i-fb"/></svg>
+        </a>
+        <a href="https://instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="ShareFlow on Instagram">
+          <svg class="sf-ico" aria-hidden="true"><use href="#i-ig"/></svg>
+        </a>
+        <a href="https://linkedin.com/" target="_blank" rel="noopener noreferrer" aria-label="ShareFlow on LinkedIn">
+          <svg class="sf-ico" aria-hidden="true"><use href="#i-in"/></svg>
+        </a>
+        <a href="https://wa.me/" target="_blank" rel="noopener noreferrer" aria-label="Chat with ShareFlow on WhatsApp">
+          <svg class="sf-ico" aria-hidden="true"><use href="#i-wa"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <nav aria-label="Platform">
+      <h2>Platform</h2>
+      <ul>
+        <li><a href="{% url 'home' %}">Overview</a></li>
+        {% if user.is_authenticated %}
+          <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+          <li><a href="{% url 'buy' %}">Buy shares</a></li>
+          <li><a href="{% url 'transactions' %}">Transactions</a></li>
+        {% else %}
+          <li><a href="{% url 'register' %}">Create account</a></li>
+          <li><a href="{% url 'login' %}">Log in</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+
+    <nav aria-label="Support">
+      <h2>Support</h2>
+      <ul>
+        <li><a href="{{ faq_url|default:'#' }}">FAQ</a></li>
+        <li><a href="{{ help_url|default:'#' }}">Help centre</a></li>
+        <li><a href="{{ contact_url|default:'#' }}">Contact us</a></li>
+      </ul>
+    </nav>
+
+    <nav aria-label="Legal">
+      <h2>Legal</h2>
+      <ul>
+        <li><a href="{{ privacy_url|default:'#' }}">Privacy policy</a></li>
+        <li><a href="{{ terms_url|default:'#' }}">Terms of use</a></li>
+        <li><a href="{{ cookies_url|default:'#' }}">Cookie policy</a></li>
+      </ul>
+    </nav>
+
+  </div>
+
+  <div class="sf-foot-bar">
+    <div>
+      <span>&copy; {% now "Y" %} ShareFlow. Peer-to-peer allocation prototype.</span>
+      <span>Demonstration only. No real payments or guaranteed returns.</span>
+    </div>
+  </div>
+
+</footer>
+
+<!-- COOKIE NOTICE -->
+
+<section
+  class="sf-cookie"
+  id="sf-cookie"
+  role="dialog"
+  aria-labelledby="sf-cookie-title"
+  aria-describedby="sf-cookie-text"
+>
+  <div class="sf-cookie-top">
+    <span class="tile">
+      <svg class="sf-ico" aria-hidden="true"><use href="#i-cookie"/></svg>
+    </span>
+
+    <div>
+      <h2 id="sf-cookie-title">Your cookie choices</h2>
+      <p id="sf-cookie-text">
+        We use essential cookies to keep you signed in and secure.
+        With your permission we also use cookies to see how the site
+        is used and improve it. Read our
+        <a href="{{ cookies_url|default:'#' }}">cookie policy</a>.
+      </p>
+    </div>
+  </div>
+
+  <div class="sf-cookie-actions">
+    <button type="button" class="essential" data-choice="essential">
+      Essential only
+    </button>
+    <button type="button" class="accept" data-choice="all">
+      Accept all
+    </button>
+  </div>
+</section>
+
+<script>
+(function () {
+  "use strict";
+
+  var root = document.documentElement;
+
+  /* ---------- mobile drawer ---------- */
+
+  var nav = document.getElementById("sf-nav");
+  var scrim = document.getElementById("sf-scrim");
+  var openBtn = document.getElementById("sf-open");
+  var closeBtn = document.getElementById("sf-close");
+
+  function openMenu() {
+    if (!nav || !scrim || !openBtn || !closeBtn) return;
+
+    nav.classList.add("is-open");
+    scrim.classList.add("is-open");
+    openBtn.setAttribute("aria-expanded", "true");
+    root.classList.add("sf-lock");
+
+    setTimeout(function () {
+      closeBtn.focus();
+    }, 60);
+  }
+
+  function closeMenu(returnFocus) {
+    if (!nav || !scrim || !openBtn) return;
+
+    nav.classList.remove("is-open");
+    scrim.classList.remove("is-open");
+    openBtn.setAttribute("aria-expanded", "false");
+    root.classList.remove("sf-lock");
+
+    if (returnFocus) {
+      openBtn.focus();
+    }
+  }
+
+  if (openBtn) {
+    openBtn.addEventListener("click", openMenu);
+  }
+
+  if (closeBtn) {
+    closeBtn.addEventListener("click", function () {
+      closeMenu(true);
+    });
+  }
+
+  if (scrim) {
+    scrim.addEventListener("click", function () {
+      closeMenu(true);
+    });
+  }
+
+  if (nav) {
+    nav.addEventListener("click", function (e) {
+      if (e.target.closest("a")) {
+        closeMenu(false);
+      }
+    });
+  }
+
+  window.addEventListener("resize", function () {
+    if (window.innerWidth > 960) {
+      closeMenu(false);
+    }
+  });
+
+  /* ---------- notifications ---------- */
+
+  var notificationBtn = document.getElementById("sf-notification-btn");
+  var notificationPanel = document.getElementById("sf-notification-panel");
+  var notificationClose = document.getElementById("sf-notification-close");
+
+  function closeNotifications() {
+    if (!notificationBtn || !notificationPanel) return;
+
+    notificationPanel.classList.remove("is-open");
+    notificationBtn.setAttribute("aria-expanded", "false");
+    notificationPanel.setAttribute("aria-hidden", "true");
+  }
+
+  function toggleNotifications(e) {
+    if (!notificationBtn || !notificationPanel) return;
+
+    e.stopPropagation();
+
+    var isOpen = notificationPanel.classList.contains("is-open");
+
+    closeNotifications();
+
+    if (!isOpen) {
+      notificationPanel.classList.add("is-open");
+      notificationBtn.setAttribute("aria-expanded", "true");
+      notificationPanel.setAttribute("aria-hidden", "false");
+    }
+  }
+
+  if (notificationBtn) {
+    notificationBtn.addEventListener("click", toggleNotifications);
+  }
+
+  if (notificationPanel) {
+    notificationPanel.addEventListener("click", function (e) {
+      e.stopPropagation();
+    });
+  }
+
+  if (notificationClose) {
+    notificationClose.addEventListener("click", function (e) {
+      e.stopPropagation();
+      closeNotifications();
+    });
+  }
+
+  document.addEventListener("click", function (e) {
+    if (!e.target.closest(".sf-notification")) {
+      closeNotifications();
+    }
+  });
+
+  /* ---------- keyboard controls ---------- */
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      closeNotifications();
+
+      if (nav && nav.classList.contains("is-open")) {
+        closeMenu(true);
+      }
+    }
+
+    if (nav && nav.classList.contains("is-open") && e.key === "Tab") {
+      var focusable = nav.querySelectorAll(
+        "a[href], button:not([disabled]), input:not([disabled])"
+      );
+
+      if (!focusable.length) return;
+
+      var first = focusable[0];
+      var last = focusable[focusable.length - 1];
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  });
+
+  /* ---------- cookie notice ---------- */
+
+  var KEY = "shareflow-cookie-consent";
+  var box = document.getElementById("sf-cookie");
+
+  function stored() {
+    try {
+      return localStorage.getItem(KEY);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function save(value) {
+    try {
+      localStorage.setItem(KEY, value);
+    } catch (e) {}
+  }
+
+  if (box) {
+    if (!stored()) {
+      setTimeout(function () {
+        if (document.body.contains(box)) {
+          box.classList.add("is-visible");
+        }
+      }, 900);
+    } else {
+      box.remove();
+    }
+
+    box.addEventListener("click", function (e) {
+      var button = e.target.closest("[data-choice]");
+
+      if (!button) return;
+
+      var choice = button.getAttribute("data-choice");
+
+      save(choice);
+      box.classList.remove("is-visible");
+
+      document.dispatchEvent(
+        new CustomEvent("shareflow:consent", {
+          detail: choice
+        })
+      );
+
+      setTimeout(function () {
+        if (box.parentNode) {
+          box.remove();
+        }
+      }, 400);
+    });
+  }
+
+})();
+</script>
+
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

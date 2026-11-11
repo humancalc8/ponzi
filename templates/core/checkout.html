@@ -1,0 +1,354 @@
+
+{% extends "base.html" %}
+
+{% block title %}Checkout | ShareFlow{% endblock %}
+
+{% block extra_head %}
+<style>
+  .sf-checkout-page {
+    min-height: calc(100vh - var(--sf-header, 68px));
+    padding: 55px 20px 70px;
+    background: var(--sf-paper, #fff);
+  }
+
+  .sf-checkout-wrapper {
+    width: 100%;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .sf-checkout-card {
+    padding: 38px;
+    background: var(--sf-white, #fff);
+    border: 1px solid var(--sf-line, #D9DBE0);
+    border-radius: 5px;
+  }
+
+  .sf-checkout-eyebrow {
+    display: inline-block;
+    margin-bottom: 14px;
+    color: var(--sf-brass, #D9261C);
+    font-family: var(--sf-sans, sans-serif);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+  }
+
+  .sf-checkout-card h1 {
+    margin: 0;
+    color: var(--sf-ink, #15171C);
+    font-family: var(--sf-serif, sans-serif);
+    font-size: clamp(30px, 5vw, 39px);
+    font-weight: 700;
+    letter-spacing: -.045em;
+    line-height: 1.15;
+  }
+
+  .sf-checkout-description {
+    margin: 13px 0 30px;
+    color: var(--sf-muted, #5E6470);
+    font-family: var(--sf-sans, sans-serif);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .sf-checkout-section-label {
+    margin: 0 0 8px;
+    color: var(--sf-ink, #15171C);
+    font-family: var(--sf-sans, sans-serif);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+
+  .sf-checkout-summary {
+    padding: 5px 18px;
+    border: 1px solid var(--sf-line, #D9DBE0);
+    border-radius: 3px;
+  }
+
+  .sf-checkout-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--sf-line, #D9DBE0);
+    font-family: var(--sf-sans, sans-serif);
+    font-size: 13px;
+  }
+
+  .sf-checkout-row:last-child {
+    border-bottom: 0;
+  }
+
+  .sf-checkout-label {
+    color: var(--sf-muted, #5E6470);
+  }
+
+  .sf-checkout-value {
+    color: var(--sf-ink, #15171C);
+    font-weight: 600;
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+
+  .sf-checkout-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin: 22px 0 30px;
+    padding: 20px 0;
+    border-top: 1px solid var(--sf-ink, #15171C);
+    border-bottom: 1px solid var(--sf-ink, #15171C);
+  }
+
+  .sf-checkout-total span {
+    color: var(--sf-ink, #15171C);
+    font-family: var(--sf-sans, sans-serif);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .sf-checkout-total strong {
+    color: var(--sf-ink, #15171C);
+    font-family: var(--sf-serif, sans-serif);
+    font-size: 27px;
+    letter-spacing: -.03em;
+  }
+
+  .sf-checkout-form {
+    margin-top: 25px;
+  }
+
+  .sf-checkout-form label {
+    display: block;
+    margin-bottom: 9px;
+    color: var(--sf-ink, #15171C);
+    font-family: var(--sf-sans, sans-serif);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .sf-checkout-input {
+    display: block;
+    width: 100%;
+    min-height: 48px;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1px solid var(--sf-line, #D9DBE0);
+    border-radius: 3px;
+    outline: none;
+    background: #fff;
+    color: var(--sf-ink, #15171C);
+    font-family: var(--sf-sans, sans-serif);
+    font-size: 14px;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+
+  .sf-checkout-input:focus {
+    border-color: var(--sf-ink, #15171C);
+    box-shadow: 0 0 0 3px rgba(21, 23, 28, .07);
+  }
+
+  .sf-checkout-input::placeholder {
+    color: #9A9DA5;
+  }
+
+  .sf-checkout-actions {
+    display: grid;
+    gap: 11px;
+    margin-top: 22px;
+  }
+
+  .sf-checkout-actions button {
+    width: 100%;
+    min-height: 49px;
+    padding: 13px 18px;
+    border-radius: 3px;
+    font-family: var(--sf-sans, sans-serif);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .sf-checkout-disabled {
+    border: 1px solid var(--sf-line, #D9DBE0);
+    background: #F1F1F2;
+    color: #92959D;
+    cursor: not-allowed;
+  }
+
+  .sf-checkout-demo {
+    border: 1px solid var(--sf-ink, #15171C);
+    background: var(--sf-ink, #15171C);
+    color: #fff;
+    cursor: pointer;
+    transition: background .2s ease, border-color .2s ease;
+  }
+
+  .sf-checkout-demo:hover {
+    border-color: var(--sf-brass, #D9261C);
+    background: var(--sf-brass, #D9261C);
+  }
+
+  .sf-checkout-notice {
+    margin-top: 23px;
+    padding: 16px 17px;
+    border: 1px solid var(--sf-line, #D9DBE0);
+    border-left: 3px solid var(--sf-brass, #D9261C);
+    background: #FAFAFA;
+  }
+
+  .sf-checkout-notice strong {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--sf-ink, #15171C);
+    font-family: var(--sf-sans, sans-serif);
+    font-size: 13px;
+  }
+
+  .sf-checkout-notice p {
+    margin: 0;
+    color: var(--sf-muted, #5E6470);
+    font-family: var(--sf-sans, sans-serif);
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  .sf-checkout-fineprint {
+    margin: 21px 0 0;
+    color: var(--sf-muted, #5E6470);
+    font-family: var(--sf-sans, sans-serif);
+    font-size: 12px;
+    line-height: 1.8;
+  }
+
+  @media (max-width: 540px) {
+    .sf-checkout-page {
+      padding: 30px 15px 45px;
+    }
+
+    .sf-checkout-card {
+      padding: 25px 20px;
+    }
+
+    .sf-checkout-card h1 {
+      font-size: 32px;
+    }
+
+    .sf-checkout-row {
+      font-size: 12px;
+    }
+
+    .sf-checkout-total strong {
+      font-size: 23px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="sf-checkout-page">
+  <div class="sf-checkout-wrapper">
+
+    <div class="sf-checkout-card">
+
+      <span class="sf-checkout-eyebrow">Checkout</span>
+
+      <h1>Complete your share request.</h1>
+
+      <p class="sf-checkout-description">
+        Review your selected shares and provide your M-Pesa number
+        before continuing.
+      </p>
+
+      <p class="sf-checkout-section-label">Purchase summary</p>
+
+      <div class="sf-checkout-summary">
+
+        <div class="sf-checkout-row">
+          <span class="sf-checkout-label">Share batch</span>
+          <strong class="sf-checkout-value">{{ batch.title }}</strong>
+        </div>
+
+        <div class="sf-checkout-row">
+          <span class="sf-checkout-label">Number of shares</span>
+          <strong class="sf-checkout-value">{{ shares|floatformat:0 }}</strong>
+        </div>
+
+        <div class="sf-checkout-row">
+          <span class="sf-checkout-label">Price per share</span>
+          <strong class="sf-checkout-value">KSh {{ share_price|floatformat:2 }}</strong>
+        </div>
+
+        <div class="sf-checkout-row">
+          <span class="sf-checkout-label">Maturity package</span>
+          <strong class="sf-checkout-value">{{ package.name }}</strong>
+        </div>
+
+      </div>
+
+      <div class="sf-checkout-total">
+        <span>Total amount</span>
+        <strong>KSh {{ amount|floatformat:2 }}</strong>
+      </div>
+
+      <form method="post" class="sf-checkout-form">
+        {% csrf_token %}
+
+        <label for="phone">M-Pesa phone number</label>
+
+        <input
+          type="tel"
+          name="phone"
+          id="phone"
+          class="sf-checkout-input"
+          placeholder="e.g. 0712345678"
+          autocomplete="tel"
+          inputmode="tel"
+          required
+        >
+
+        <div class="sf-checkout-actions">
+
+          <button
+            type="button"
+            class="sf-checkout-disabled"
+            disabled
+            aria-disabled="true"
+          >
+            Pay Now — STK Push
+          </button>
+
+          <button
+            type="submit"
+            class="sf-checkout-demo"
+          >
+            Continue in Demo Mode
+          </button>
+
+        </div>
+      </form>
+
+      <div class="sf-checkout-notice">
+        <strong>Demo payment mode</strong>
+        <p>
+          Actual M-Pesa payments are currently disabled.
+          Continuing in Demo Mode submits a simulated purchase request
+          for administrator review. No money is transferred.
+        </p>
+      </div>
+
+      <p class="sf-checkout-fineprint">
+        Your share request is subject to administrator approval.
+        The maturity package and any proposed rates are subject to
+        applicable terms and regulatory requirements.
+      </p>
+
+    </div>
+  </div>
+</section>
+{% endblock %}

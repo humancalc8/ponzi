@@ -1,0 +1,307 @@
+
+{% extends "core/base.html" %}
+
+{% block title %}Purchase Shares | ShareFlow{% endblock %}
+
+{% block content %}
+<style>
+    .purchase-page {
+        max-width: 850px;
+        margin: 0 auto;
+        padding: 42px 20px 70px;
+        color: #20242b;
+    }
+
+    .purchase-back {
+        display: inline-block;
+        color: #64748b;
+        font-size: 13px;
+        text-decoration: none;
+        margin-bottom: 25px;
+    }
+
+    .purchase-page h1 {
+        font-size: clamp(27px, 4vw, 36px);
+        letter-spacing: -1px;
+        margin: 0 0 8px;
+    }
+
+    .purchase-intro {
+        color: #758092;
+        line-height: 1.6;
+        margin-bottom: 28px;
+        font-size: 14px;
+    }
+
+    .purchase-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        align-items: start;
+    }
+
+    .purchase-card {
+        background: #fff;
+        border: 1px solid #e5e9ef;
+        border-radius: 14px;
+        padding: 23px;
+    }
+
+    .purchase-card h3 {
+        font-size: 16px;
+        margin: 0 0 20px;
+    }
+
+    .seller-info {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+        padding: 13px 0;
+        border-bottom: 1px solid #edf0f3;
+        font-size: 13px;
+    }
+
+    .seller-info span {
+        color: #788292;
+    }
+
+    .seller-info strong {
+        text-align: right;
+    }
+
+    .purchase-field {
+        margin-bottom: 19px;
+    }
+
+    .purchase-field label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 13px;
+        font-weight: 650;
+    }
+
+    .purchase-field input,
+    .purchase-field select {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12px 13px;
+        border: 1px solid #dce2e9;
+        border-radius: 8px;
+        background: #fff;
+        font-size: 14px;
+        color: #20242b;
+    }
+
+    .purchase-field input:focus,
+    .purchase-field select:focus {
+        outline: none;
+        border-color: #526783;
+        box-shadow: 0 0 0 3px rgba(82, 103, 131, .1);
+    }
+
+    .field-help {
+        display: block;
+        color: #8993a2;
+        font-size: 11px;
+        margin-top: 7px;
+    }
+
+    .field-error {
+        color: #b42318;
+        font-size: 12px;
+        margin-top: 6px;
+    }
+
+    .total-box {
+        background: #f5f7fa;
+        border: 1px solid #e8edf2;
+        border-radius: 10px;
+        padding: 17px;
+        margin: 20px 0;
+    }
+
+    .total-box span {
+        display: block;
+        color: #758092;
+        font-size: 12px;
+        margin-bottom: 6px;
+    }
+
+    .total-box strong {
+        font-size: 27px;
+        letter-spacing: -.5px;
+    }
+
+    .purchase-note {
+        color: #788292;
+        font-size: 12px;
+        line-height: 1.6;
+        margin: 17px 0;
+    }
+
+    .purchase-submit {
+        display: block;
+        width: 100%;
+        border: 0;
+        border-radius: 9px;
+        padding: 14px;
+        background: #172033;
+        color: white;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .purchase-submit:hover {
+        background: #303f59;
+    }
+
+    @media (max-width: 650px) {
+        .purchase-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .purchase-page {
+            padding: 28px 15px 50px;
+        }
+    }
+</style>
+
+<section class="purchase-page">
+    <a href="{% url 'marketplace' %}" class="purchase-back">
+        &larr; Back to marketplace
+    </a>
+
+    <h1>Purchase shares</h1>
+
+    <p class="purchase-intro">
+        Choose your quantity and maturity package. Your total is
+        calculated automatically at KSh 70 per share.
+    </p>
+
+    <div class="purchase-layout">
+        <div class="purchase-card">
+            <h3>Listing information</h3>
+
+            <div class="seller-info">
+                <span>Seller</span>
+                <strong>{{ listing.seller.username }}</strong>
+            </div>
+
+            <div class="seller-info">
+                <span>Available shares</span>
+                <strong>{{ listing.remaining_shares }}</strong>
+            </div>
+
+            <div class="seller-info">
+                <span>Price per share</span>
+                <strong>KSh 70.00</strong>
+            </div>
+
+            <div class="seller-info">
+                <span>Listing status</span>
+                <strong>{{ listing.status|title }}</strong>
+            </div>
+
+            <p class="purchase-note">
+                Payment is made directly to the seller. The platform
+                records the transaction but does not hold the funds.
+                The seller must confirm receipt before the share transfer
+                and new maturity period are activated.
+            </p>
+        </div>
+
+        <div class="purchase-card">
+            <h3>Your purchase</h3>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <input type="hidden" name="listing" value="{{ listing.pk }}">
+
+                <div class="purchase-field">
+                    <label for="{{ form.shares.id_for_label }}">
+                        Number of shares
+                    </label>
+
+                    {{ form.shares }}
+
+                    {% for error in form.shares.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+
+                    <small class="field-help">
+                        Maximum available: {{ listing.remaining_shares }} shares
+                    </small>
+                </div>
+
+                <div class="purchase-field">
+                    <label for="{{ form.package.id_for_label }}">
+                        New maturity package
+                    </label>
+
+                    {{ form.package }}
+
+                    {% for error in form.package.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                {% for error in form.non_field_errors %}
+                    <div class="field-error">{{ error }}</div>
+                {% endfor %}
+
+                <div class="total-box">
+                    <span>Estimated purchase amount</span>
+                    <strong id="purchase-total">KSh 0.00</strong>
+                    <small class="field-help">
+                        KSh 70 multiplied by your selected shares
+                    </small>
+                </div>
+
+                <p class="purchase-note">
+                    Submitting creates a purchase allocation. It does
+                    not mean payment has been made or that the shares
+                    have already been transferred.
+                </p>
+
+                <button type="submit" class="purchase-submit">
+                    Continue to payment
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const sharesInput = document.getElementById("id_shares");
+    const totalElement = document.getElementById("purchase-total");
+    const pricePerShare = 70;
+
+    function updateTotal() {
+        if (!sharesInput || !totalElement) return;
+
+        const shares = Math.max(
+            0,
+            parseInt(sharesInput.value || "0", 10)
+        );
+
+        const total = shares * pricePerShare;
+
+        totalElement.textContent = "KSh " + total.toLocaleString(
+            "en-KE",
+            {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }
+        );
+    }
+
+    if (sharesInput) {
+        sharesInput.addEventListener("input", updateTotal);
+        updateTotal();
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,205 @@
+
+{% extends "base.html" %}
+
+{% block title %}Create Account | ShareFlow{% endblock %}
+
+{% block extra_head %}
+<style>
+  .sf-auth-page {
+    min-height: calc(100vh - var(--sf-header, 68px));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 20px;
+    background: var(--sf-paper, #fff);
+  }
+
+  .sf-auth-card {
+    width: 100%;
+    max-width: 480px;
+    padding: 42px;
+    background: var(--sf-white, #fff);
+    border: 1px solid var(--sf-line, #D9DBE0);
+    border-radius: 5px;
+  }
+
+  .sf-auth-eyebrow {
+    display: inline-block;
+    margin-bottom: 15px;
+    color: var(--sf-brass, #D9261C);
+    font-family: var(--sf-sans, sans-serif);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+  }
+
+  .sf-auth-card h1 {
+    margin: 0;
+    color: var(--sf-ink, #15171C);
+    font-family: var(--sf-serif, sans-serif);
+    font-size: clamp(30px, 5vw, 38px);
+    font-weight: 700;
+    letter-spacing: -.045em;
+    line-height: 1.12;
+  }
+
+  .sf-auth-description {
+    margin: 12px 0 30px;
+    color: var(--sf-muted, #5E6470);
+    font-family: var(--sf-sans, sans-serif);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .sf-auth-form p {
+    margin: 0 0 19px;
+  }
+
+  .sf-auth-form label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--sf-ink, #15171C);
+    font-family: var(--sf-sans, sans-serif);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .sf-auth-form input,
+  .sf-auth-form select,
+  .sf-auth-form textarea {
+    width: 100%;
+    min-height: 46px;
+    padding: 11px 13px;
+    border: 1px solid var(--sf-line, #D9DBE0);
+    border-radius: 3px;
+    outline: none;
+    background: #fff;
+    color: var(--sf-ink, #15171C);
+    font-family: var(--sf-sans, sans-serif);
+    font-size: 14px;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+
+  .sf-auth-form input:focus,
+  .sf-auth-form select:focus,
+  .sf-auth-form textarea:focus {
+    border-color: var(--sf-ink, #15171C);
+    box-shadow: 0 0 0 3px rgba(21, 23, 28, .07);
+  }
+
+  .sf-auth-form .helptext,
+  .sf-auth-form p small {
+    display: block;
+    margin-top: 7px;
+    color: var(--sf-muted, #5E6470);
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .sf-auth-form ul {
+    margin: 8px 0 0;
+    padding-left: 18px;
+    color: var(--sf-muted, #5E6470);
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  .sf-auth-form .errorlist {
+    margin: 7px 0 0;
+    padding: 0;
+    list-style: none;
+    color: #B42318;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .sf-auth-form .errorlist li {
+    margin-bottom: 4px;
+  }
+
+  .sf-auth-submit {
+    width: 100%;
+    min-height: 49px;
+    margin-top: 7px;
+    border: 1px solid var(--sf-ink, #15171C);
+    border-radius: 3px;
+    background: var(--sf-ink, #15171C);
+    color: #fff;
+    font-family: var(--sf-sans, sans-serif);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .2s ease, border-color .2s ease;
+  }
+
+  .sf-auth-submit:hover {
+    border-color: var(--sf-brass, #D9261C);
+    background: var(--sf-brass, #D9261C);
+  }
+
+  .sf-auth-footer {
+    margin: 25px 0 0;
+    padding-top: 20px;
+    border-top: 1px solid var(--sf-line, #D9DBE0);
+    color: var(--sf-muted, #5E6470);
+    font-family: var(--sf-sans, sans-serif);
+    font-size: 13px;
+    text-align: center;
+  }
+
+  .sf-auth-footer a {
+    color: var(--sf-ink, #15171C);
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-color: var(--sf-brass, #D9261C);
+    text-underline-offset: 3px;
+  }
+
+  @media (max-width: 540px) {
+    .sf-auth-page {
+      min-height: auto;
+      padding: 38px 16px;
+      align-items: flex-start;
+    }
+
+    .sf-auth-card {
+      padding: 28px 22px;
+    }
+
+    .sf-auth-card h1 {
+      font-size: 32px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="sf-auth-page">
+  <div class="sf-auth-card">
+    <span class="sf-auth-eyebrow">Join the platform</span>
+
+    <h1>Create your account</h1>
+
+    <p class="sf-auth-description">
+      Set up your member profile to explore ShareFlow and participate
+      in peer-to-peer share bidding.
+    </p>
+
+    <form method="post" class="sf-auth-form">
+      {% csrf_token %}
+
+      {{ form.as_p }}
+
+      <button type="submit" class="sf-auth-submit">
+        Create account
+      </button>
+    </form>
+
+    <p class="sf-auth-footer">
+      Already registered?
+      <a href="{% url 'login' %}">Sign in</a>
+    </p>
+  </div>
+</section>
+{% endblock %}

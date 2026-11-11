@@ -1,0 +1,553 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+.hp{
+  --ink:#15171C; --paper:#fff; --soft:#F3F4F6; --line:#D9DBE0; --muted:#5E6470;
+  --red:#D9261C; --green:#0A6B45;
+  --display:"Bricolage Grotesque","Hanken Grotesk",system-ui,sans-serif;
+  --text:"Hanken Grotesk",system-ui,sans-serif;
+  font-family:var(--text); color:var(--ink); line-height:1.6;
+  max-width:1160px; margin:0 auto; padding:72px 28px 0;
+}
+.hp *{box-sizing:border-box}
+.hp h1,.hp h2,.hp h3{font-family:var(--display); margin:0; font-weight:600; letter-spacing:-.03em; line-height:1.04}
+.hp p{margin:0}
+.hp a{color:inherit}
+.hp :focus-visible{outline:2px solid var(--red); outline-offset:3px}
+.hp .num{font-variant-numeric:tabular-nums}
+
+/* ---------- intro ---------- */
+.hp .intro{display:grid; grid-template-columns:1.1fr .9fr; gap:56px; align-items:center}
+.hp .art svg{width:100%; max-width:520px; height:auto; display:block; margin-left:auto; overflow:visible}
+.hp h1{font-size:clamp(42px,6vw,80px); letter-spacing:-.045em}
+.hp .lead{font-size:18px; color:var(--muted); max-width:44ch; margin-top:24px}
+.hp .actions{display:flex; gap:28px; align-items:center; margin-top:28px; flex-wrap:wrap}
+.hp .btn{background:var(--ink); color:#fff; text-decoration:none; font-weight:600; padding:15px 26px; border-radius:4px; transition:background .2s}
+.hp .btn:hover{background:#2D313B}
+.hp .quiet{font-weight:500; text-underline-offset:5px; text-decoration-thickness:1px}
+
+/* ---------- board ---------- */
+.hp .board{margin-top:72px; border-top:3px solid var(--ink)}
+.hp .readout{display:grid; grid-template-columns:1fr 1fr 1.2fr; border-bottom:1px solid var(--line)}
+.hp .cell{padding:28px 32px 28px 0}
+.hp .cell + .cell{padding-left:32px; border-left:1px solid var(--line)}
+.hp .cell > span{display:block; font-size:14px; color:var(--muted); margin-bottom:10px}
+.hp .big{font-family:var(--display); font-weight:600; font-size:clamp(40px,5.2vw,68px); line-height:1; letter-spacing:-.04em}
+.hp .cell small{display:block; margin-top:10px; font-size:14px; color:var(--muted)}
+.hp .clock{display:flex; align-items:baseline; gap:4px}
+.hp .clock i{font-style:normal; font-family:var(--display); font-size:34px; color:#B5B9C2; margin:0 2px}
+.hp .live{display:inline-flex; align-items:center; gap:8px; font-size:14px; font-weight:600}
+.hp .live::before{content:""; width:9px; height:9px; border-radius:50%; background:#A5AAB4}
+.hp .live.open::before{background:var(--red)}
+.hp .live.open{color:var(--red)}
+
+.hp .day{position:relative; height:132px; margin-top:8px}
+.hp .day .ticks{position:absolute; left:0; right:0; bottom:28px; height:14px;
+  background:linear-gradient(to right,var(--line) 1px,transparent 1px) 0 100%/calc(100%/24) 100% repeat-x;
+  border-right:1px solid var(--line); border-bottom:1px solid var(--ink)}
+.hp .day .hr{position:absolute; bottom:4px; font-size:13px; color:var(--muted); transform:translateX(-50%)}
+.hp .day .hr:first-of-type{transform:none}
+.hp .mark{position:absolute; bottom:28px; transform:translateX(-50%); text-align:center; white-space:nowrap}
+.hp .mark b{display:block; font-family:var(--display); font-size:22px; font-weight:600; letter-spacing:-.02em; line-height:1}
+.hp .mark span{display:block; font-size:13px; color:var(--muted); margin-bottom:8px}
+.hp .mark::after{content:""; display:block; width:3px; height:48px; background:var(--ink); margin:10px auto -14px}
+.hp .needle{position:absolute; bottom:28px; top:0; width:2px; background:var(--red); left:0; transform:translateX(-1px); transition:left 1s linear}
+.hp .needle em{position:absolute; top:-2px; left:8px; font-style:normal; font-size:13px; font-weight:600; color:var(--red); white-space:nowrap}
+.hp .needle::before{content:""; position:absolute; top:-2px; left:-4px; width:10px; height:10px; border-radius:50%; background:var(--red)}
+.hp .board-note{margin-top:14px; font-size:14px; color:var(--muted)}
+
+/* ---------- shared section heads ---------- */
+.hp .section{margin-top:128px}
+.hp .section h2,.hp .inventory h2{font-size:clamp(30px,4vw,48px); max-width:16ch}
+.hp .sec-head{display:grid; grid-template-columns:1fr 1fr; gap:48px; margin-bottom:44px; align-items:end}
+.hp .sec-head p{color:var(--muted); max-width:42ch}
+
+/* ---------- available share batches ---------- */
+.hp .inventory{margin-top:128px}
+.hp .batch-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:24px}
+.hp .batch-card{position:relative; overflow:hidden; background:var(--paper); border:1px solid var(--line); border-radius:8px;
+  display:flex; flex-direction:column; transition:border-color .2s, transform .25s, box-shadow .25s}
+.hp .batch-card:hover{border-color:var(--ink); transform:translateY(-3px); box-shadow:0 18px 32px -22px rgba(21,23,28,.45)}
+.hp .batch-card::before{content:""; position:absolute; left:0; top:0; right:0; height:4px; background:var(--ink)}
+.hp .batch-main{padding:28px 28px 26px; position:relative}
+.hp .batch-top{display:flex; justify-content:space-between; align-items:center; font-size:13.5px; margin-bottom:22px}
+.hp .batch-status{display:inline-flex; align-items:center; gap:8px; font-weight:600; color:var(--green)}
+.hp .batch-status::before{content:""; width:8px; height:8px; border-radius:50%; background:var(--green)}
+.hp .batch-reference{color:var(--muted); font-variant-numeric:tabular-nums}
+.hp .batch-card h3{font-size:22px; letter-spacing:-.02em; max-width:18ch; line-height:1.15}
+.hp .batch-visual{position:absolute; right:22px; top:58px; width:64px; height:64px; opacity:.95}
+.hp .batch-count{font-family:var(--display); font-weight:600; font-size:64px; line-height:1; letter-spacing:-.045em; margin-top:26px; font-variant-numeric:tabular-nums}
+.hp .batch-count-label{font-size:14px; color:var(--muted); margin-top:8px}
+
+/* ticket perforation */
+.hp .batch-details{position:relative; display:grid; grid-template-columns:1fr 1fr; gap:16px; padding:22px 28px 20px; border-top:2px dashed var(--line); margin-top:auto; background:#FAFAFB}
+.hp .batch-details::before,.hp .batch-details::after{content:""; position:absolute; top:-10px; width:18px; height:18px; border-radius:50%; background:var(--paper); border:1px solid var(--line)}
+.hp .batch-details::before{left:-10px}
+.hp .batch-details::after{right:-10px}
+.hp .batch-details span{display:block; font-size:13px; color:var(--muted); margin-bottom:4px}
+.hp .batch-details strong{font-family:var(--display); font-size:20px; font-weight:600; letter-spacing:-.02em; font-variant-numeric:tabular-nums}
+.hp .batch-cta{display:flex; justify-content:space-between; align-items:center; padding:16px 28px; border-top:1px solid var(--line);
+  font-weight:600; font-size:15px; text-decoration:none; transition:background .2s, color .2s}
+.hp .batch-cta svg{width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; transition:transform .2s}
+.hp .batch-cta:hover{background:var(--ink); color:#fff}
+.hp .batch-cta:hover svg{transform:translateX(4px)}
+
+.hp .empty-batches{display:flex; gap:24px; align-items:center; padding:36px 40px; border:1.5px dashed #BFC3CB; border-radius:8px; background:var(--soft)}
+.hp .empty-batches svg{flex:none; width:64px; height:64px}
+.hp .empty-batches h3{font-size:24px}
+.hp .empty-batches p{margin-top:6px; color:var(--muted); max-width:52ch}
+
+/* ---------- how it works ---------- */
+.hp .flow{border-top:1px solid var(--ink)}
+.hp .flow-step{display:grid; grid-template-columns:128px 1fr 1fr; gap:48px; align-items:center; padding:40px 0; border-bottom:1px solid var(--line)}
+.hp .ill{width:128px; height:128px; background:var(--soft); border-radius:10px; display:grid; place-items:center}
+.hp .ill svg{width:96px; height:96px}
+.hp .step-no{font-size:14px; font-weight:600; color:var(--red); margin-bottom:10px}
+.hp .flow-step h3{font-size:clamp(30px,3.6vw,44px)}
+.hp .flow-step .sum{margin-top:12px; color:var(--muted); max-width:40ch}
+.hp .flow-step ul{list-style:none; margin:0; padding:0; display:grid; gap:14px}
+.hp .flow-step li{position:relative; padding-left:30px; font-size:15.5px; line-height:1.5}
+.hp .flow-step li::before{content:""; position:absolute; left:6px; top:5px; width:6px; height:11px; border:solid var(--green); border-width:0 2px 2px 0; transform:rotate(45deg)}
+.hp .flow-step li b{font-weight:600}
+
+/* ---------- maturity ---------- */
+.hp .terms{border-top:1px solid var(--ink)}
+.hp .term{display:grid; grid-template-columns:120px 1fr 90px; gap:24px; align-items:center; padding:26px 0; border-bottom:1px solid var(--line)}
+.hp .term .d{font-family:var(--display); font-size:28px; font-weight:600; letter-spacing:-.03em}
+.hp .term .d small{font-family:var(--text); font-size:15px; font-weight:400; color:var(--muted); letter-spacing:0; margin-left:4px}
+.hp .track{height:14px; background:var(--soft); border-radius:2px}
+.hp .track i{display:block; height:100%; background:var(--ink); border-radius:2px}
+.hp .term .r{font-family:var(--display); font-size:34px; font-weight:600; letter-spacing:-.03em; text-align:right}
+.hp .terms-note{margin-top:14px; font-size:14px; color:var(--muted)}
+
+/* ---------- disclaimer ---------- */
+.hp .fine{display:grid; grid-template-columns:180px 1fr; gap:24px; margin-top:128px; padding:28px 0 0; border-top:1px solid var(--ink); font-size:14.5px; color:var(--muted)}
+.hp .fine b{color:var(--ink); font-weight:600}
+.hp .fine p{max-width:78ch}
+.hp .tail{height:24px}
+
+@media (max-width:900px){
+  .hp{padding:48px 20px 0}
+  .hp .intro,.hp .sec-head{grid-template-columns:1fr; gap:28px}
+  .hp .art svg{max-width:420px; margin:8px auto 0}
+  .hp .readout{grid-template-columns:1fr}
+  .hp .cell,.hp .cell + .cell{padding:22px 0; border-left:0}
+  .hp .cell + .cell{border-top:1px solid var(--line)}
+  .hp .flow-step{grid-template-columns:1fr; gap:22px; padding:32px 0}
+  .hp .ill{width:104px; height:104px}
+  .hp .ill svg{width:80px; height:80px}
+  .hp .term{grid-template-columns:90px 1fr 64px; gap:16px}
+  .hp .fine{grid-template-columns:1fr; gap:8px}
+  .hp .section,.hp .inventory,.hp .fine{margin-top:88px}
+  .hp .empty-batches{flex-direction:column; align-items:flex-start; padding:28px}
+}
+@media (prefers-reduced-motion:reduce){
+  .hp .batch-card,.hp .batch-cta svg,.hp .needle{transition:none}
+  .hp .batch-card:hover{transform:none}
+}
+</style>
+
+<div class="hp">
+
+  <!-- INTRO -->
+  <section class="intro">
+    <div>
+      <h1>Share bidding on a fixed daily clock.</h1>
+      <p class="lead">
+        Members bid for shares at 8:00 AM and 8:00 PM East Africa Time, hold them
+        to maturity and sell to each other directly. Every bid and allocation is recorded.
+      </p>
+      <div class="actions">
+        <a class="btn" href="{% url 'register' %}">Create an account</a>
+        <a class="quiet" href="{% url 'login' %}">Member sign in</a>
+      </div>
+    </div>
+
+    <div class="art">
+      <svg viewBox="0 0 560 470" role="img" aria-label="Two phones exchanging shares between members">
+        <defs>
+          <linearGradient id="bez" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3A3F4B"/><stop offset="1" stop-color="#15171C"/></linearGradient>
+          <linearGradient id="cardg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3A3F4B"/><stop offset="1" stop-color="#15171C"/></linearGradient>
+          <linearGradient id="coing" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F4776E"/><stop offset=".55" stop-color="#D9261C"/><stop offset="1" stop-color="#B01F16"/></linearGradient>
+          <filter id="ds" x="-30%" y="-20%" width="160%" height="150%"><feDropShadow dx="0" dy="16" stdDeviation="12" flood-color="#15171C" flood-opacity=".28"/></filter>
+          <g id="coin"><ellipse cx="0" cy="5" rx="22" ry="26" fill="#8E1710"/><ellipse rx="22" ry="26" fill="url(#coing)"/><ellipse rx="15" ry="19" fill="none" stroke="#8E1710" stroke-opacity=".5" stroke-width="2"/><text y="8" text-anchor="middle" font-size="22" font-weight="700" fill="#8E1710" font-family="Bricolage Grotesque,sans-serif">S</text></g>
+        </defs>
+
+        <circle cx="280" cy="250" r="236" fill="#F3F4F6"/>
+        <path d="M150 150 Q280 -10 410 150" fill="none" stroke="#15171C" stroke-opacity=".25" stroke-width="1.5" stroke-dasharray="3 7"/>
+
+        <g transform="translate(48 160) rotate(-5)" filter="url(#ds)">
+          <rect x="-3" y="70" width="3" height="30" rx="1.5" fill="#2D313B"/>
+          <rect width="150" height="290" rx="26" fill="url(#bez)"/>
+          <rect x="9" y="9" width="132" height="272" rx="19" fill="#fff"/>
+          <rect x="52" y="15" width="46" height="9" rx="4.5" fill="#15171C"/>
+          <rect x="22" y="44" width="106" height="62" rx="9" fill="url(#cardg)"/>
+          <rect x="32" y="56" width="20" height="15" rx="3" fill="#fff" fill-opacity=".85"/>
+          <rect x="32" y="82" width="62" height="4" rx="2" fill="#fff" fill-opacity=".7"/>
+          <rect x="32" y="91" width="40" height="4" rx="2" fill="#fff" fill-opacity=".4"/>
+          <text x="75" y="136" text-anchor="middle" font-size="10.5" fill="#5E6470" font-family="Hanken Grotesk,sans-serif">Shares available</text>
+          <text x="75" y="162" text-anchor="middle" font-size="24" font-weight="600" fill="#15171C" font-family="Bricolage Grotesque,sans-serif">1,250</text>
+          <rect x="22" y="186" width="106" height="8" rx="4" fill="#E7E9ED"/><rect x="22" y="186" width="72" height="8" rx="4" fill="#15171C"/>
+          <rect x="22" y="226" width="106" height="32" rx="6" fill="#15171C"/>
+          <text x="75" y="247" text-anchor="middle" font-size="13" font-weight="600" fill="#fff" font-family="Hanken Grotesk,sans-serif">Place bid</text>
+        </g>
+
+        <g transform="translate(364 160) rotate(5)" filter="url(#ds)">
+          <rect x="-3" y="70" width="3" height="30" rx="1.5" fill="#2D313B"/>
+          <rect width="150" height="290" rx="26" fill="url(#bez)"/>
+          <rect x="9" y="9" width="132" height="272" rx="19" fill="#fff"/>
+          <rect x="52" y="15" width="46" height="9" rx="4.5" fill="#15171C"/>
+          <circle cx="75" cy="66" r="24" fill="#0A6B45"/>
+          <path d="M63 66l9 9 17-18" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="75" y="116" text-anchor="middle" font-size="12.5" font-weight="600" fill="#15171C" font-family="Hanken Grotesk,sans-serif">Allocation confirmed</text>
+          <rect x="22" y="136" width="106" height="36" rx="7" fill="#fff" stroke="#D9DBE0"/><circle cx="40" cy="154" r="7" fill="#D9261C"/><rect x="54" y="146" width="44" height="5" rx="2.5" fill="#C9CCD3"/><rect x="54" y="157" width="28" height="4" rx="2" fill="#E7E9ED"/>
+          <rect x="22" y="180" width="106" height="36" rx="7" fill="#fff" stroke="#D9DBE0"/><circle cx="40" cy="198" r="7" fill="#15171C"/><rect x="54" y="190" width="44" height="5" rx="2.5" fill="#C9CCD3"/><rect x="54" y="201" width="28" height="4" rx="2" fill="#E7E9ED"/>
+          <rect x="22" y="232" width="106" height="30" rx="6" fill="#F0F1F3"/>
+          <text x="75" y="251" text-anchor="middle" font-size="11.5" font-weight="600" fill="#15171C" font-family="Hanken Grotesk,sans-serif">View holdings</text>
+        </g>
+
+        <use href="#coin" transform="translate(150 128) rotate(-14) scale(.72)"/>
+        <use href="#coin" transform="translate(205 78) rotate(-8) scale(.86)"/>
+        <use href="#coin" transform="translate(280 52) scale(1.05)"/>
+        <use href="#coin" transform="translate(355 78) rotate(8) scale(.86)"/>
+        <use href="#coin" transform="translate(410 128) rotate(14) scale(.72)"/>
+      </svg>
+    </div>
+  </section>
+
+
+  <!-- BOARD -->
+  <section class="board" aria-label="Today's bidding">
+    <div class="readout">
+
+      <div class="cell">
+        <span>Shares available</span>
+        <div class="big num">{{ available_shares|default:"0" }}</div>
+        <small>Across all released batches</small>
+      </div>
+
+      <div class="cell">
+        <span id="session-label">Next bidding session</span>
+        <div class="big" id="session-time">8:00 AM</div>
+        <small id="timer-footer">Calculating next session…</small>
+      </div>
+
+      <div class="cell">
+        <span>
+          {% if session_is_open %}
+            <b class="live open">Bidding is open</b>
+          {% else %}
+            <b class="live">Bidding is closed</b>
+          {% endif %}
+        </span>
+        <div class="big clock num" id="bidding-countdown">
+          <strong id="timer-hours">00</strong><i>:</i><strong id="timer-minutes">00</strong><i>:</i><strong id="timer-seconds">00</strong>
+        </div>
+        <small>Hours, minutes and seconds to the next session</small>
+      </div>
+
+    </div>
+
+    <div class="day" id="day" role="img" aria-label="Today in East Africa Time with sessions at 8 AM and 8 PM">
+      <div class="mark" style="left:33.333%"><span>Morning session</span><b>08:00</b></div>
+      <div class="mark" style="left:83.333%"><span>Evening session</span><b>20:00</b></div>
+      <div class="needle" id="needle"><em id="needle-label">Now</em></div>
+      <div class="ticks"></div>
+      <span class="hr" style="left:0">00:00</span>
+      <span class="hr" style="left:25%">06:00</span>
+      <span class="hr" style="left:50%">12:00</span>
+      <span class="hr" style="left:75%">18:00</span>
+      <span class="hr" style="left:100%">24:00</span>
+    </div>
+    <p class="board-note">Today in Nairobi (EAT). The red line is the current time.</p>
+  </section>
+
+
+  <!-- AVAILABLE SHARE BATCHES -->
+  <section class="inventory" id="available-shares">
+
+    <div class="sec-head">
+      <h2>Shares currently available</h2>
+      <p>Browse the batches released by the administrator. Each share has a fixed value of KSh 70.</p>
+    </div>
+
+    {% if batches %}
+      <div class="batch-grid">
+
+        {% for batch in batches %}
+          {% widthratio batch.available_shares 1 70 as batch_value %}
+          <article class="batch-card">
+
+            <div class="batch-main">
+              <div class="batch-top">
+                <span class="batch-status">Available</span>
+                <span class="batch-reference">Batch #{{ batch.pk }}</span>
+              </div>
+
+              <h3>{{ batch.title }}</h3>
+
+              <!-- certificate stack -->
+              <svg class="batch-visual" viewBox="0 0 64 64" aria-hidden="true">
+                <rect x="14" y="6" width="40" height="30" rx="3" fill="#E7E9ED"/>
+                <rect x="9" y="14" width="40" height="30" rx="3" fill="#fff" stroke="#15171C" stroke-width="2"/>
+                <rect x="4" y="22" width="40" height="30" rx="3" fill="#fff" stroke="#15171C" stroke-width="2"/>
+                <rect x="10" y="30" width="18" height="3" rx="1.5" fill="#15171C"/>
+                <rect x="10" y="37" width="26" height="3" rx="1.5" fill="#C9CCD3"/>
+                <circle cx="35" cy="43" r="5" fill="#D9261C"/>
+              </svg>
+
+              <div class="batch-count">{{ batch.available_shares|floatformat:"0g" }}</div>
+              <p class="batch-count-label">Shares available for bidding</p>
+            </div>
+
+            <div class="batch-details">
+              <div>
+                <span>Price per share</span>
+                <strong>KSh {{ batch.share_price|floatformat:"0g" }}</strong>
+              </div>
+              <div>
+                <span>Available value</span>
+                <strong>KSh {{ batch_value|floatformat:"0g" }}</strong>
+              </div>
+            </div>
+
+            <a class="batch-cta" href="{% url 'buy' %}">
+              <span>Bid on this batch</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </a>
+
+          </article>
+        {% endfor %}
+
+      </div>
+
+    {% else %}
+
+      <div class="empty-batches">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <path d="M8 36l8-18h32l8 18v14a3 3 0 0 1-3 3H11a3 3 0 0 1-3-3z" fill="#fff" stroke="#15171C" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M8 36h14l3 6h14l3-6h14" fill="none" stroke="#15171C" stroke-width="2.5" stroke-linejoin="round"/>
+          <circle cx="32" cy="12" r="4" fill="#D9261C"/>
+        </svg>
+        <div>
+          <h3>No shares currently available</h3>
+          <p>There are no released share batches with available quantities at the moment. Please check again later.</p>
+        </div>
+      </div>
+
+    {% endif %}
+
+  </section>
+
+
+  <!-- HOW IT WORKS -->
+  <section class="section">
+    <div class="sec-head">
+      <h2>From bid to confirmed ownership</h2>
+      <p>Four steps, each recorded, so you always know where your shares stand and who holds them.</p>
+    </div>
+
+    <div class="flow">
+
+      <!-- 1 BID -->
+      <article class="flow-step">
+        <div class="ill">
+          <svg viewBox="0 0 112 112" aria-hidden="true">
+            <circle cx="56" cy="44" r="31" fill="none" stroke="#D9261C" stroke-width="2"/>
+            <circle cx="56" cy="44" r="26" fill="#15171C"/>
+            <text x="56" y="51" text-anchor="middle" font-size="19" font-weight="700" fill="#fff" font-family="Bricolage Grotesque,sans-serif">BID</text>
+            <rect x="52" y="70" width="8" height="32" rx="3" fill="#15171C"/>
+          </svg>
+        </div>
+        <div>
+          <div class="step-no">Step 1</div>
+          <h3>Bid</h3>
+          <p class="sum">Place your request while a session is open.</p>
+        </div>
+        <ul>
+          <li><b>Pick a batch</b> from the shares currently available.</li>
+          <li><b>Choose a maturity class</b> of 3, 7 or 14 days.</li>
+          <li><b>Submit before the session closes</b>, at 8:00 AM or 8:00 PM EAT.</li>
+        </ul>
+      </article>
+
+      <!-- 2 HOLD -->
+      <article class="flow-step">
+        <div class="ill">
+          <svg viewBox="0 0 112 112" aria-hidden="true">
+            <path d="M38 18v14M74 18v14" stroke="#15171C" stroke-width="5" stroke-linecap="round"/>
+            <rect x="20" y="26" width="72" height="68" rx="7" fill="#fff" stroke="#15171C" stroke-width="2.5"/>
+            <path d="M20 33a7 7 0 0 1 7-7h58a7 7 0 0 1 7 7v10H20z" fill="#15171C"/>
+            <g fill="#C9CCD3"><circle cx="38" cy="58" r="3.5"/><circle cx="56" cy="58" r="3.5"/><circle cx="74" cy="58" r="3.5"/><circle cx="38" cy="75" r="3.5"/><circle cx="56" cy="75" r="3.5"/></g>
+            <circle cx="74" cy="75" r="10" fill="#D9261C"/>
+            <path d="M69 75l4 4 7-8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="step-no">Step 2</div>
+          <h3>Hold</h3>
+          <p class="sum">Your allocation is confirmed and counting down to maturity.</p>
+        </div>
+        <ul>
+          <li><b>See each holding</b> with its reference and principal.</li>
+          <li><b>Follow the maturity date</b> and the expected value.</li>
+          <li><b>Check status</b> from your Bought shares page at any time.</li>
+        </ul>
+      </article>
+
+      <!-- 3 LIST -->
+      <article class="flow-step">
+        <div class="ill">
+          <svg viewBox="0 0 112 112" aria-hidden="true">
+            <path d="M24 62L56 30h34a5 5 0 0 1 5 5v34L63 101a7 7 0 0 1-9.9 0L24 71.900a7 7 0 0 1 0-9.900z" fill="#fff" stroke="#15171C" stroke-width="2.5" stroke-linejoin="round"/>
+            <circle cx="79" cy="46" r="6" fill="#D9261C"/>
+            <text x="58" y="72" transform="rotate(-45 58 72)" text-anchor="middle" font-size="13" font-weight="700" fill="#15171C" font-family="Bricolage Grotesque,sans-serif">KSh 70</text>
+          </svg>
+        </div>
+        <div>
+          <div class="step-no">Step 3</div>
+          <h3>List</h3>
+          <p class="sum">Once eligible, offer your shares to other members.</p>
+        </div>
+        <ul>
+          <li><b>Choose shares to sell</b> once they are eligible.</li>
+          <li><b>Make them visible</b> to members who want to buy.</li>
+          <li><b>Wait for a match</b> between buyer and seller.</li>
+        </ul>
+      </article>
+
+      <!-- 4 CONFIRM -->
+      <article class="flow-step">
+        <div class="ill">
+          <svg viewBox="0 0 112 112" aria-hidden="true">
+            <circle cx="30" cy="36" r="11" fill="#15171C"/>
+            <path d="M10 78a20 20 0 0 1 40 0z" fill="#15171C"/>
+            <circle cx="82" cy="36" r="11" fill="#15171C"/>
+            <path d="M62 78a20 20 0 0 1 40 0z" fill="#15171C"/>
+            <path d="M44 30h24" stroke="#C9CCD3" stroke-width="2.5" stroke-dasharray="3 5" stroke-linecap="round"/>
+            <circle cx="56" cy="80" r="17" fill="#0A6B45" stroke="#F3F4F6" stroke-width="4"/>
+            <path d="M47.500 80.500l6 6 11-12" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="step-no">Step 4</div>
+          <h3>Confirm</h3>
+          <p class="sum">The trade is completed and ownership moves to the buyer.</p>
+        </div>
+        <ul>
+          <li><b>Buyer and seller confirm</b> the member-to-member payment.</li>
+          <li><b>Ownership is recorded</b> against the buyer's account.</li>
+          <li><b>Review the allocation</b> under Sold shares and Transactions.</li>
+        </ul>
+      </article>
+
+    </div>
+  </section>
+
+
+  <!-- MATURITY CLASSES -->
+  <section class="section">
+    <div class="sec-head">
+      <h2>Longer terms, higher proposed rates</h2>
+      <p>You choose a maturity class when you bid. Bar length shows the term.</p>
+    </div>
+
+    <div class="terms">
+      <div class="term"><div class="d num">3<small>days</small></div><div class="track"><i style="width:21.4%"></i></div><div class="r num">6%</div></div>
+      <div class="term"><div class="d num">7<small>days</small></div><div class="track"><i style="width:50%"></i></div><div class="r num">12%</div></div>
+      <div class="term"><div class="d num">14<small>days</small></div><div class="track"><i style="width:100%"></i></div><div class="r num">20%</div></div>
+    </div>
+    <p class="terms-note">Rates are proposed per maturity term. They are not guaranteed.</p>
+  </section>
+
+
+
+  <div class="tail"></div>
+</div>
+
+
+<script>
+(function () {
+
+    const timezone = "Africa/Nairobi";
+
+    const hoursElement = document.getElementById("timer-hours");
+    const minutesElement = document.getElementById("timer-minutes");
+    const secondsElement = document.getElementById("timer-seconds");
+
+    const labelElement = document.getElementById("session-label");
+    const timeElement = document.getElementById("session-time");
+    const footerElement = document.getElementById("timer-footer");
+    const needle = document.getElementById("needle");
+    const needleLabel = document.getElementById("needle-label");
+
+    if (!hoursElement || !minutesElement || !secondsElement) { return; }
+
+    // Current date and time in Nairobi.
+    function getNairobiTime() {
+        const parts = new Intl.DateTimeFormat("en-GB", {
+            timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit",
+            hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23"
+        }).formatToParts(new Date());
+        const result = {};
+        parts.forEach(function (p) { if (p.type !== "literal") { result[p.type] = Number(p.value); } });
+        return result;
+    }
+
+    // Next 8 AM or 8 PM Nairobi session.
+    function getNextSession(local) {
+        let targetHour;
+        let targetDay = new Date(Date.UTC(local.year, local.month - 1, local.day));
+
+        if (local.hour < 8) { targetHour = 8; }
+        else if (local.hour < 20) { targetHour = 20; }
+        else { targetHour = 8; targetDay.setUTCDate(targetDay.getUTCDate() + 1); }
+
+        const targetDate = new Date(Date.UTC(
+            targetDay.getUTCFullYear(), targetDay.getUTCMonth(), targetDay.getUTCDate(), targetHour, 0, 0
+        ));
+        // Nairobi uses UTC+3.
+        return { time: targetDate.getTime() - (3 * 60 * 60 * 1000), hour: targetHour };
+    }
+
+    function pad(n) { return String(n).padStart(2, "0"); }
+
+    function update() {
+        const local = getNairobiTime();
+        const session = getNextSession(local);
+
+        let diff = Math.max(0, Math.floor((session.time - Date.now()) / 1000));
+        const h = Math.floor(diff / 3600); diff %= 3600;
+        const m = Math.floor(diff / 60), s = diff % 60;
+
+        hoursElement.textContent = pad(h);
+        minutesElement.textContent = pad(m);
+        secondsElement.textContent = pad(s);
+
+        labelElement.textContent = session.hour === 8 ? "Next: morning session" : "Next: evening session";
+        timeElement.textContent = session.hour === 8 ? "8:00 AM" : "8:00 PM";
+
+        const sessionDate = new Intl.DateTimeFormat("en-GB", {
+            timeZone: timezone, weekday: "long", day: "numeric", month: "long"
+        }).format(new Date(session.time));
+        footerElement.textContent = sessionDate + ", East Africa Time";
+
+        // Move the "now" line along the 24-hour strip.
+        if (needle) {
+            const frac = (local.hour + local.minute / 60 + local.second / 3600) / 24;
+            needle.style.left = (frac * 100).toFixed(3) + "%";
+            needleLabel.textContent = "Now " + pad(local.hour) + ":" + pad(local.minute);
+            needleLabel.style.left = frac > 0.88 ? "auto" : "8px";
+            needleLabel.style.right = frac > 0.88 ? "8px" : "auto";
+        }
+    }
+
+    update();
+    setInterval(update, 1000);
+
+})();
+</script>
+
+{% endblock %}

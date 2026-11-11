@@ -1,0 +1,288 @@
+
+{% extends "base.html" %}
+
+{% block title %}Share Marketplace | ShareFlow{% endblock %}
+
+{% block content %}
+<style>
+    .marketplace {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 42px 22px 70px;
+        color: #20242b;
+    }
+
+    .marketplace-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 20px;
+        margin-bottom: 32px;
+    }
+
+    .marketplace-eyebrow {
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+    }
+
+    .marketplace h1 {
+        margin: 9px 0;
+        font-size: clamp(28px, 4vw, 40px);
+        letter-spacing: -1.5px;
+        font-weight: 750;
+    }
+
+    .marketplace-intro {
+        color: #687385;
+        max-width: 620px;
+        line-height: 1.7;
+        font-size: 15px;
+    }
+
+    .marketplace-price {
+        background: #f4f6f8;
+        border: 1px solid #e5e9ef;
+        padding: 14px 18px;
+        border-radius: 12px;
+        white-space: nowrap;
+    }
+
+    .marketplace-price small {
+        display: block;
+        color: #778194;
+        font-size: 11px;
+        margin-bottom: 5px;
+    }
+
+    .marketplace-price strong {
+        font-size: 20px;
+    }
+
+    .marketplace-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 20px;
+    }
+
+    .listing-card {
+        border: 1px solid #e6eaf0;
+        border-radius: 15px;
+        padding: 22px;
+        background: #fff;
+        transition: border-color .2s ease, transform .2s ease;
+    }
+
+    .listing-card:hover {
+        border-color: #aab7c8;
+        transform: translateY(-3px);
+    }
+
+    .listing-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .listing-label {
+        color: #778194;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .listing-status {
+        background: #edf7f1;
+        color: #247347;
+        border-radius: 30px;
+        padding: 6px 10px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: capitalize;
+    }
+
+    .listing-quantity {
+        font-size: 32px;
+        font-weight: 750;
+        letter-spacing: -1px;
+        margin-bottom: 4px;
+    }
+
+    .listing-quantity small {
+        color: #7b8492;
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0;
+    }
+
+    .listing-price {
+        color: #667085;
+        font-size: 13px;
+        margin-bottom: 22px;
+    }
+
+    .listing-divider {
+        border: 0;
+        border-top: 1px solid #edf0f3;
+        margin: 18px 0;
+    }
+
+    .listing-details {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 13px;
+        font-size: 13px;
+    }
+
+    .listing-details span:first-child {
+        color: #788292;
+    }
+
+    .listing-details strong {
+        color: #303846;
+        text-align: right;
+    }
+
+    .listing-action {
+        display: block;
+        width: 100%;
+        text-align: center;
+        background: #172033;
+        color: #fff;
+        padding: 13px 16px;
+        border-radius: 9px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 700;
+        margin-top: 22px;
+        transition: background .2s ease;
+    }
+
+    .listing-action:hover {
+        background: #303f59;
+        color: #fff;
+    }
+
+    .empty-marketplace {
+        border: 1px dashed #d8dee7;
+        border-radius: 15px;
+        padding: 55px 20px;
+        text-align: center;
+        grid-column: 1 / -1;
+    }
+
+    .empty-marketplace h3 {
+        margin: 0 0 8px;
+        font-size: 19px;
+    }
+
+    .empty-marketplace p {
+        color: #778194;
+        font-size: 14px;
+    }
+
+    @media (max-width: 900px) {
+        .marketplace-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 600px) {
+        .marketplace {
+            padding: 28px 15px 50px;
+        }
+
+        .marketplace-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .marketplace-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .marketplace-price {
+            width: 100%;
+        }
+    }
+</style>
+
+<section class="marketplace">
+    <div class="marketplace-header">
+        <div>
+            <div class="marketplace-eyebrow">Member-to-member trading</div>
+            <h1>Share Marketplace</h1>
+            <p class="marketplace-intro">
+                Browse shares listed by other members. Select a listing,
+                choose how many shares you want to purchase, and start a
+                new maturity period after the seller confirms the transfer.
+            </p>
+        </div>
+
+        <div class="marketplace-price">
+            <small>Fixed marketplace price</small>
+            <strong>KSh 70 <span style="font-size:12px;color:#778194;">/ share</span></strong>
+        </div>
+    </div>
+
+    <div class="marketplace-grid">
+        {% for listing in listings %}
+            {% if listing.remaining_shares > 0 %}
+                <article class="listing-card">
+                    <div class="listing-top">
+                        <span class="listing-label">Member listing</span>
+                        <span class="listing-status">{{ listing.status }}</span>
+                    </div>
+
+                    <div class="listing-quantity">
+                        {{ listing.remaining_shares }}
+                        <small>shares available</small>
+                    </div>
+
+                    <div class="listing-price">
+                        KSh 70 per share
+                    </div>
+
+                    <hr class="listing-divider">
+
+                    <div class="listing-details">
+                        <span>Seller</span>
+                        <strong>{{ listing.seller.username }}</strong>
+                    </div>
+
+                    <div class="listing-details">
+                        <span>Total listed</span>
+                        <strong>{{ listing.total_shares }} shares</strong>
+                    </div>
+
+                    <div class="listing-details">
+                        <span>Available value</span>
+                        <strong>KSh {{ listing.remaining_amount|floatformat:2 }}</strong>
+                    </div>
+
+                    <div class="listing-details">
+                        <span>Listed on</span>
+                        <strong>{{ listing.created_at|date:"d M Y" }}</strong>
+                    </div>
+
+                    <a
+                        href="{% url 'buy_from_member' listing.pk %}"
+                        class="listing-action"
+                    >
+                        View and buy shares
+                    </a>
+                </article>
+            {% endif %}
+        {% empty %}
+            <div class="empty-marketplace">
+                <h3>No shares available yet</h3>
+                <p>When members list matured shares, they will appear here.</p>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

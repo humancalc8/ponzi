@@ -1,0 +1,660 @@
+
+{% extends "core/base.html" %}
+
+{% block title %}Submit Payment | ShareFlow{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ---------- ShareFlow payment page ---------- */
+
+.sf-payment {
+    --pay-ink: var(--sf-ink, #15171C);
+    --pay-muted: var(--sf-muted, #5E6470);
+    --pay-line: var(--sf-line, #D9DBE0);
+    --pay-paper: var(--sf-paper, #FFFFFF);
+    --pay-accent: var(--sf-brass, #D9261C);
+    --pay-dark: var(--sf-green, #15171C);
+
+    width: min(100% - 40px, 960px);
+    margin: 48px auto 80px;
+    color: var(--pay-ink);
+    font-family: var(--sf-sans, sans-serif);
+}
+
+/* Back navigation */
+
+.sf-payment-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 28px;
+    color: var(--pay-muted);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: color .2s;
+}
+
+.sf-payment-back:hover {
+    color: var(--pay-accent);
+}
+
+.sf-payment-back svg {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Header */
+
+.sf-payment-header {
+    margin-bottom: 30px;
+}
+
+.sf-payment-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 15px;
+    color: var(--pay-accent);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+}
+
+.sf-payment-eyebrow::before {
+    content: "";
+    width: 22px;
+    height: 2px;
+    background: var(--pay-accent);
+}
+
+.sf-payment h1 {
+    margin: 0;
+    color: var(--pay-ink);
+    font-family: var(--sf-serif, sans-serif);
+    font-size: clamp(34px, 5vw, 46px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -.045em;
+}
+
+.sf-payment-intro {
+    max-width: 590px;
+    margin: 13px 0 0;
+    color: var(--pay-muted);
+    font-size: 14px;
+    line-height: 1.75;
+}
+
+/* Layout */
+
+.sf-payment-layout {
+    display: grid;
+    grid-template-columns: .95fr 1.15fr;
+    gap: 22px;
+    align-items: start;
+}
+
+/* Cards */
+
+.sf-payment-card {
+    min-width: 0;
+    padding: 25px;
+    background: var(--pay-paper);
+    border: 1px solid var(--pay-line);
+    border-radius: 11px;
+    box-shadow: 0 8px 30px rgba(21, 23, 28, .035);
+}
+
+.sf-payment-card-header {
+    padding-bottom: 19px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--pay-line);
+}
+
+.sf-payment-card-header h2 {
+    margin: 0 0 6px;
+    color: var(--pay-ink);
+    font-family: var(--sf-serif, sans-serif);
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: -.025em;
+}
+
+.sf-payment-card-header p {
+    margin: 0;
+    color: var(--pay-muted);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* Purchase details */
+
+.sf-payment-detail {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+    padding: 15px 0;
+    border-bottom: 1px solid #ECEEF1;
+    font-size: 13px;
+}
+
+.sf-payment-detail:last-of-type {
+    border-bottom: 0;
+}
+
+.sf-payment-detail span {
+    color: var(--pay-muted);
+    flex: 1;
+}
+
+.sf-payment-detail strong {
+    max-width: 60%;
+    color: var(--pay-ink);
+    font-weight: 600;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.sf-payment-total {
+    margin-top: 19px;
+    padding: 20px;
+    background: #F6F7F8;
+    border: 1px solid var(--pay-line);
+    border-radius: 9px;
+}
+
+.sf-payment-total span {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--pay-muted);
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.sf-payment-total strong {
+    display: block;
+    color: var(--pay-ink);
+    font-family: var(--sf-serif, sans-serif);
+    font-size: 29px;
+    font-weight: 700;
+    letter-spacing: -.04em;
+    overflow-wrap: anywhere;
+}
+
+/* Form */
+
+.sf-payment-fields {
+    padding-top: 12px;
+}
+
+.sf-payment-field {
+    margin-bottom: 21px;
+}
+
+.sf-payment-field label {
+    display: block;
+    margin-bottom: 9px;
+    color: var(--pay-ink);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.sf-payment-field input,
+.sf-payment-field textarea,
+.sf-payment-field select {
+    display: block;
+    width: 100%;
+    min-height: 48px;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1px solid var(--pay-line);
+    border-radius: 7px;
+    background: #FFFFFF;
+    color: var(--pay-ink);
+    font-family: var(--sf-sans, sans-serif);
+    font-size: 14px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+}
+
+.sf-payment-field textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.sf-payment-field input:focus,
+.sf-payment-field textarea:focus,
+.sf-payment-field select:focus {
+    border-color: var(--pay-accent);
+    box-shadow: 0 0 0 3px rgba(217, 38, 28, .09);
+}
+
+.sf-payment-field input::placeholder,
+.sf-payment-field textarea::placeholder {
+    color: #9297A1;
+}
+
+.sf-payment-field input:disabled,
+.sf-payment-field textarea:disabled {
+    background: #F6F7F8;
+    cursor: not-allowed;
+}
+
+.sf-payment-help {
+    display: block;
+    margin-top: 8px;
+    color: var(--pay-muted);
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+/* Validation */
+
+.sf-payment-error {
+    margin-top: 7px;
+    color: #B42318;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.sf-payment-error ul {
+    margin: 0;
+    padding-left: 17px;
+}
+
+.sf-payment-error-summary {
+    padding: 13px 15px;
+    margin: 14px 0;
+    background: #FFF5F4;
+    border: 1px solid #F1C7C3;
+    border-left: 3px solid #B42318;
+    border-radius: 7px;
+    color: #A1261D;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* Notices */
+
+.sf-payment-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    padding: 14px 15px;
+    margin: 20px 0;
+    background: #F6F7F8;
+    border: 1px solid var(--pay-line);
+    border-left: 3px solid var(--pay-accent);
+    border-radius: 7px;
+}
+
+.sf-payment-notice svg {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    fill: none;
+    stroke: var(--pay-muted);
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.sf-payment-notice p {
+    margin: 0;
+    color: var(--pay-muted);
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+/* Django messages */
+
+.sf-payment-messages {
+    display: grid;
+    gap: 9px;
+    margin-bottom: 22px;
+}
+
+.sf-payment-message {
+    padding: 13px 16px;
+    background: #F6F7F8;
+    border: 1px solid var(--pay-line);
+    border-left: 3px solid var(--pay-dark);
+    border-radius: 7px;
+    color: var(--pay-ink);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.sf-payment-message.error,
+.sf-payment-message.danger {
+    border-left-color: #B42318;
+}
+
+.sf-payment-message.warning {
+    border-left-color: var(--pay-accent);
+}
+
+/* Submit */
+
+.sf-payment-submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 11px;
+    width: 100%;
+    min-height: 51px;
+    padding: 14px 18px;
+    margin-top: 24px;
+    border: 1px solid var(--pay-dark);
+    border-radius: 7px;
+    background: var(--pay-dark);
+    color: #FFFFFF;
+    font-family: var(--sf-sans, sans-serif);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .2s, transform .2s;
+}
+
+.sf-payment-submit:hover {
+    background: #2D313B;
+    transform: translateY(-1px);
+}
+
+.sf-payment-submit:focus-visible {
+    outline: 2px solid var(--pay-accent);
+    outline-offset: 3px;
+}
+
+.sf-payment-submit svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Responsive */
+
+@media (max-width: 760px) {
+    .sf-payment-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 560px) {
+    .sf-payment {
+        width: calc(100% - 32px);
+        margin: 32px auto 55px;
+    }
+
+    .sf-payment-card {
+        padding: 20px 17px;
+    }
+
+    .sf-payment h1 {
+        font-size: 36px;
+    }
+
+    .sf-payment-intro {
+        font-size: 13px;
+    }
+
+    .sf-payment-detail {
+        font-size: 12px;
+        gap: 10px;
+    }
+
+    .sf-payment-total strong {
+        font-size: 27px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sf-payment-submit,
+    .sf-payment-field input,
+    .sf-payment-field textarea,
+    .sf-payment-field select {
+        transition: none;
+    }
+}
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+<section class="sf-payment">
+
+    <!-- Back navigation -->
+    <a href="{% url 'transactions' %}" class="sf-payment-back">
+
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m15 18-6-6 6-6"/>
+            <path d="M9 12h12"/>
+        </svg>
+
+        Back to transactions
+
+    </a>
+
+    <!-- Page heading -->
+    <header class="sf-payment-header">
+
+        <span class="sf-payment-eyebrow">Payment submission</span>
+
+        <h1>Submit payment.</h1>
+
+        <p class="sf-payment-intro">
+            Enter the M-Pesa transaction details for your purchase.
+            Ensure the payment was sent directly to the seller before
+            submitting your evidence.
+        </p>
+
+    </header>
+
+    <!-- Django messages -->
+    {% if messages %}
+        <div class="sf-payment-messages" role="status">
+
+            {% for message in messages %}
+                <div class="sf-payment-message {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+
+        </div>
+    {% endif %}
+
+    <div class="sf-payment-layout">
+
+        <!-- Purchase summary -->
+        <section class="sf-payment-card">
+
+            <div class="sf-payment-card-header">
+
+                <h2>Purchase summary</h2>
+
+                <p>Review your purchase details before submitting.</p>
+
+            </div>
+
+            <div class="sf-payment-detail">
+                <span>Transaction reference</span>
+                <strong>{{ allocation.reference }}</strong>
+            </div>
+
+            <div class="sf-payment-detail">
+                <span>Seller</span>
+                <strong>{{ allocation.seller.username }}</strong>
+            </div>
+
+            <div class="sf-payment-detail">
+                <span>Number of shares</span>
+                <strong>{{ allocation.shares }}</strong>
+            </div>
+
+            <div class="sf-payment-detail">
+                <span>Price per share</span>
+                <strong>KSh 70.00</strong>
+            </div>
+
+            <div class="sf-payment-detail">
+                <span>Maturity package</span>
+                <strong>{{ allocation.package.days }} days</strong>
+            </div>
+
+            <div class="sf-payment-total">
+
+                <span>Amount to pay</span>
+
+                <strong>
+                    KSh {{ allocation.amount|floatformat:2 }}
+                </strong>
+
+            </div>
+
+        </section>
+
+
+        <!-- Payment evidence form -->
+        <section class="sf-payment-card">
+
+            <div class="sf-payment-card-header">
+
+                <h2>Payment evidence</h2>
+
+                <p>
+                    Provide the transaction details from your M-Pesa
+                    confirmation message.
+                </p>
+
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="sf-payment-error-summary">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="sf-payment-fields">
+
+                    <!-- M-Pesa transaction code -->
+                    <div class="sf-payment-field">
+
+                        <label for="{{ form.mpesa_code.id_for_label }}">
+                            M-Pesa transaction code
+                        </label>
+
+                        {{ form.mpesa_code }}
+
+                        {% if form.mpesa_code.errors %}
+                            <div class="sf-payment-error">
+                                {{ form.mpesa_code.errors }}
+                            </div>
+                        {% endif %}
+
+                        <small class="sf-payment-help">
+                            Enter the transaction code from your
+                            M-Pesa confirmation message.
+                        </small>
+
+                    </div>
+
+
+                    <!-- Amount paid -->
+                    <div class="sf-payment-field">
+
+                        <label for="{{ form.amount.id_for_label }}">
+                            Amount paid (KSh)
+                        </label>
+
+                        {{ form.amount }}
+
+                        {% if form.amount.errors %}
+                            <div class="sf-payment-error">
+                                {{ form.amount.errors }}
+                            </div>
+                        {% endif %}
+
+                        <small class="sf-payment-help">
+                            Enter the exact amount shown in your
+                            transaction.
+                        </small>
+
+                    </div>
+
+
+                    <!-- Additional note -->
+                    <div class="sf-payment-field">
+
+                        <label for="{{ form.note.id_for_label }}">
+                            Additional note (optional)
+                        </label>
+
+                        {{ form.note }}
+
+                        {% if form.note.errors %}
+                            <div class="sf-payment-error">
+                                {{ form.note.errors }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <!-- Payment disclaimer -->
+                <div class="sf-payment-notice">
+
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9"/>
+                        <path d="M12 11v5"/>
+                        <path d="M12 8h.01"/>
+                    </svg>
+
+                    <p>
+                        By submitting, you confirm that you have sent
+                        the stated amount to the seller. Submission alone
+                        does not verify payment or transfer ownership
+                        of shares. The seller must confirm receipt.
+                    </p>
+
+                </div>
+
+
+                <button type="submit" class="sf-payment-submit">
+
+                    Submit payment evidence
+
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M5 12h14"/>
+                        <path d="m12 5 7 7-7 7"/>
+                    </svg>
+
+                </button>
+
+            </form>
+
+        </section>
+
+    </div>
+
+</section>
+
+{% endblock %}

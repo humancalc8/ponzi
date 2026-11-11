@@ -1,0 +1,530 @@
+
+{% extends "base.html" %}
+
+{% block title %}Buy Shares | ShareFlow{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ---------- ShareFlow bidding page ---------- */
+
+.sf-buy {
+    --buy-ink: var(--sf-ink, #15171C);
+    --buy-muted: var(--sf-muted, #5E6470);
+    --buy-line: var(--sf-line, #D9DBE0);
+    --buy-paper: var(--sf-paper, #FFFFFF);
+    --buy-accent: var(--sf-brass, #D9261C);
+    --buy-dark: var(--sf-green, #15171C);
+
+    width: min(100% - 40px, 680px);
+    margin: 64px auto 80px;
+    color: var(--buy-ink);
+    font-family: var(--sf-sans, sans-serif);
+}
+
+.sf-buy-header {
+    margin-bottom: 30px;
+}
+
+.sf-buy-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    color: var(--buy-accent);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    margin-bottom: 17px;
+}
+
+.sf-buy-eyebrow::before {
+    content: "";
+    width: 22px;
+    height: 2px;
+    background: var(--buy-accent);
+}
+
+.sf-buy h1 {
+    margin: 0;
+    color: var(--buy-ink);
+    font-family: var(--sf-serif, sans-serif);
+    font-size: clamp(34px, 6vw, 48px);
+    line-height: 1.08;
+    font-weight: 700;
+    letter-spacing: -.045em;
+}
+
+.sf-buy-description {
+    margin: 15px 0 0;
+    max-width: 570px;
+    color: var(--buy-muted);
+    font-size: 15px;
+    line-height: 1.75;
+}
+
+/* Session information */
+
+.sf-buy-session {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 19px;
+    margin-bottom: 22px;
+    background: #F6F7F8;
+    border: 1px solid var(--buy-line);
+    border-radius: 10px;
+}
+
+.sf-buy-session-icon {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    background: #FFFFFF;
+    color: var(--buy-accent);
+    border: 1px solid var(--buy-line);
+}
+
+.sf-buy-session-icon svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.sf-buy-session-content {
+    min-width: 0;
+    flex: 1;
+}
+
+.sf-buy-session-content strong {
+    display: block;
+    color: var(--buy-ink);
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.sf-buy-session-content p {
+    margin: 0;
+    color: var(--buy-muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.sf-buy-session-content b {
+    color: var(--buy-ink);
+    font-weight: 600;
+}
+
+.sf-buy-price {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    color: var(--buy-muted);
+}
+
+.sf-buy-price strong {
+    display: inline;
+    margin: 0;
+    font-size: 15px;
+    color: var(--buy-ink);
+}
+
+/* Form surface */
+
+.sf-buy-form {
+    padding: 30px;
+    background: var(--buy-paper);
+    border: 1px solid var(--buy-line);
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(21, 23, 28, .035);
+}
+
+.sf-buy-form-heading {
+    margin-bottom: 26px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--buy-line);
+}
+
+.sf-buy-form-heading h2 {
+    margin: 0 0 7px;
+    color: var(--buy-ink);
+    font-family: var(--sf-serif, sans-serif);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -.025em;
+}
+
+.sf-buy-form-heading p {
+    margin: 0;
+    color: var(--buy-muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.sf-buy-fields {
+    display: grid;
+    gap: 23px;
+}
+
+.sf-buy-field {
+    display: grid;
+    gap: 9px;
+}
+
+.sf-buy-field label {
+    color: var(--buy-ink);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.sf-buy-field input,
+.sf-buy-field select,
+.sf-buy-field textarea {
+    width: 100%;
+    min-height: 49px;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    background: #FFFFFF;
+    color: var(--buy-ink);
+    border: 1px solid var(--buy-line);
+    border-radius: 7px;
+    outline: none;
+    font: 500 14px var(--sf-sans, sans-serif);
+    transition: border-color .2s, box-shadow .2s;
+}
+
+.sf-buy-field select {
+    cursor: pointer;
+}
+
+.sf-buy-field input:focus,
+.sf-buy-field select:focus,
+.sf-buy-field textarea:focus {
+    border-color: var(--buy-accent);
+    box-shadow: 0 0 0 3px rgba(217, 38, 28, .09);
+}
+
+.sf-buy-field input::placeholder,
+.sf-buy-field textarea::placeholder {
+    color: #9297A1;
+}
+
+.sf-buy-help {
+    color: var(--buy-muted);
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.sf-buy-errors {
+    color: #B42318;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.sf-buy-errors ul {
+    margin: 0;
+    padding-left: 17px;
+}
+
+.sf-buy-error-summary {
+    padding: 13px 15px;
+    margin-bottom: 22px;
+    color: #A1261D;
+    background: #FFF5F4;
+    border: 1px solid #F1C7C3;
+    border-left: 3px solid var(--buy-accent);
+    border-radius: 7px;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* Submit button */
+
+.sf-buy-submit {
+    width: 100%;
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 11px;
+    margin-top: 29px;
+    padding: 14px 20px;
+    border: 1px solid var(--buy-dark);
+    border-radius: 7px;
+    background: var(--buy-dark);
+    color: #FFFFFF;
+    font: 600 14px var(--sf-sans, sans-serif);
+    cursor: pointer;
+    transition: background .2s, border-color .2s, transform .2s;
+}
+
+.sf-buy-submit:hover:not(:disabled) {
+    background: #2D313B;
+    border-color: #2D313B;
+    transform: translateY(-1px);
+}
+
+.sf-buy-submit:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.sf-buy-submit svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Disclaimer */
+
+.sf-buy-disclaimer {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    margin-top: 22px;
+    padding: 16px 18px;
+    background: #F6F7F8;
+    border: 1px solid var(--buy-line);
+    border-radius: 8px;
+}
+
+.sf-buy-disclaimer svg {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin-top: 1px;
+    fill: none;
+    stroke: var(--buy-muted);
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.sf-buy-disclaimer p {
+    margin: 0;
+    color: var(--buy-muted);
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+/* Responsive */
+
+@media (max-width: 600px) {
+    .sf-buy {
+        width: calc(100% - 32px);
+        margin: 38px auto 55px;
+    }
+
+    .sf-buy h1 {
+        font-size: 36px;
+    }
+
+    .sf-buy-description {
+        font-size: 14px;
+    }
+
+    .sf-buy-session {
+        padding: 15px;
+        gap: 11px;
+    }
+
+    .sf-buy-form {
+        padding: 21px 17px;
+    }
+
+    .sf-buy-fields {
+        gap: 20px;
+    }
+
+    .sf-buy-submit {
+        min-height: 50px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sf-buy-submit,
+    .sf-buy-field input,
+    .sf-buy-field select,
+    .sf-buy-field textarea {
+        transition: none;
+    }
+}
+</style>
+{% endblock %}
+
+
+{% block content %}
+<section class="sf-buy">
+
+    <header class="sf-buy-header">
+        <span class="sf-buy-eyebrow">Bidding</span>
+
+        <h1>Choose your shares.</h1>
+
+        <p class="sf-buy-description">
+            Select an available share batch, enter the number of shares
+            you want, and choose a maturity package. Requests are accepted
+            only while a bidding session is open. Submission does not
+            confirm a purchase.
+        </p>
+    </header>
+
+    <!-- Bidding session -->
+    <div class="sf-buy-session">
+
+        <div class="sf-buy-session-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="9"/>
+                <path d="M12 7v5l3 2"/>
+            </svg>
+        </div>
+
+        <div class="sf-buy-session-content">
+
+            {% if session %}
+                <strong>{{ session.name }}</strong>
+
+                <p>
+                    Bidding session is available.
+                    <br>
+                    <b>Closes:</b>
+                    {{ session.closes_at|date:"d M Y, H:i" }}
+                </p>
+            {% else %}
+                <strong>No open bidding session</strong>
+
+                <p>
+                    There is currently no available bidding session.
+                    Please check again when the next session opens.
+                </p>
+            {% endif %}
+
+            <div class="sf-buy-price">
+                Fixed share price:
+                <strong>KSh 70.00</strong>
+                <span>per share</span>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Share selection form -->
+    <form method="post" class="sf-buy-form">
+        {% csrf_token %}
+
+        <div class="sf-buy-form-heading">
+            <h2>Share request details</h2>
+            <p>Enter your preferred allocation details below.</p>
+        </div>
+
+        {% if form.non_field_errors %}
+            <div class="sf-buy-error-summary">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <div class="sf-buy-fields">
+
+            <div class="sf-buy-field">
+                {{ form.batch.label_tag }}
+
+                {{ form.batch }}
+
+                {% if form.batch.errors %}
+                    <div class="sf-buy-errors">
+                        {{ form.batch.errors }}
+                    </div>
+                {% endif %}
+
+                {% if form.batch.help_text %}
+                    <small class="sf-buy-help">
+                        {{ form.batch.help_text }}
+                    </small>
+                {% endif %}
+            </div>
+
+            <div class="sf-buy-field">
+                {{ form.shares.label_tag }}
+
+                {{ form.shares }}
+
+                {% if form.shares.errors %}
+                    <div class="sf-buy-errors">
+                        {{ form.shares.errors }}
+                    </div>
+                {% endif %}
+
+                {% if form.shares.help_text %}
+                    <small class="sf-buy-help">
+                        {{ form.shares.help_text }}
+                    </small>
+                {% endif %}
+            </div>
+
+            <div class="sf-buy-field">
+                {{ form.package.label_tag }}
+
+                {{ form.package }}
+
+                {% if form.package.errors %}
+                    <div class="sf-buy-errors">
+                        {{ form.package.errors }}
+                    </div>
+                {% endif %}
+
+                {% if form.package.help_text %}
+                    <small class="sf-buy-help">
+                        {{ form.package.help_text }}
+                    </small>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <button
+            type="submit"
+            class="sf-buy-submit"
+            {% if not session %}disabled{% endif %}
+        >
+            Continue to payment
+
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5 12h14"/>
+                <path d="m12 5 7 7-7 7"/>
+            </svg>
+        </button>
+
+    </form>
+
+    <!-- Important information -->
+    <div class="sf-buy-disclaimer">
+
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 11v5"/>
+            <path d="M12 8h.01"/>
+        </svg>
+
+        <p>
+            The proposed maturity rates are illustrative and require legal
+            and financial validation. This prototype records share requests
+            and does not accept, hold, or transfer money. Submission does
+            not guarantee allocation or returns.
+        </p>
+
+    </div>
+
+</section>
+{% endblock %}

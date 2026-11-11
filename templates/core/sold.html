@@ -1,0 +1,363 @@
+
+{% extends "base.html" %}
+
+{% block title %}My Sales | ShareFlow{% endblock %}
+
+{% block content %}
+
+<style>
+    .sales-page {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 42px 22px 70px;
+        color: #20242b;
+    }
+
+    .sales-header {
+        margin-bottom: 30px;
+    }
+
+    .sales-eyebrow {
+        color: #758092;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+    }
+
+    .sales-header h1 {
+        font-size: clamp(28px, 4vw, 38px);
+        letter-spacing: -1px;
+        margin: 9px 0;
+    }
+
+    .sales-header p {
+        color: #758092;
+        font-size: 14px;
+        line-height: 1.7;
+        max-width: 650px;
+    }
+
+    .sales-table-wrap {
+        width: 100%;
+        overflow-x: auto;
+        border: 1px solid #e5e9ef;
+        border-radius: 13px;
+        background: #fff;
+    }
+
+    .sales-table {
+        width: 100%;
+        min-width: 850px;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    .sales-table th {
+        background: #f7f8fa;
+        color: #758092;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .6px;
+        padding: 16px;
+        white-space: nowrap;
+    }
+
+    .sales-table td {
+        padding: 17px 16px;
+        border-top: 1px solid #edf0f3;
+        font-size: 13px;
+        vertical-align: middle;
+    }
+
+    .sales-table tbody tr:hover {
+        background: #fafbfc;
+    }
+
+    .transaction-reference {
+        font-weight: 700;
+        color: #303846;
+    }
+
+    .buyer-name {
+        font-weight: 600;
+    }
+
+    .amount {
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .status {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 30px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: capitalize;
+        white-space: nowrap;
+    }
+
+    .status-awaiting_payment {
+        background: #fff5e8;
+        color: #a15c16;
+    }
+
+    .status-submitted {
+        background: #edf3ff;
+        color: #315da8;
+    }
+
+    .status-confirmed {
+        background: #eaf6ee;
+        color: #247347;
+    }
+
+    .status-disputed {
+        background: #fff0ef;
+        color: #b42318;
+    }
+
+    .status-cancelled {
+        background: #f0f1f3;
+        color: #667085;
+    }
+
+    .sales-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .action-button {
+        display: inline-block;
+        border: 0;
+        border-radius: 7px;
+        padding: 9px 12px;
+        font-size: 11px;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .confirm-button {
+        background: #172033;
+        color: #fff;
+    }
+
+    .confirm-button:hover {
+        background: #303f59;
+        color: #fff;
+    }
+
+    .dispute-button {
+        background: #fff;
+        color: #b42318;
+        border: 1px solid #e7c4c1;
+    }
+
+    .dispute-button:hover {
+        background: #fff5f4;
+    }
+
+    .no-action {
+        color: #929baa;
+        font-size: 12px;
+    }
+
+    .empty-sales {
+        padding: 60px 20px;
+        text-align: center;
+    }
+
+    .empty-sales h3 {
+        font-size: 19px;
+        margin-bottom: 8px;
+    }
+
+    .empty-sales p {
+        color: #788292;
+        font-size: 13px;
+    }
+
+    .sales-note {
+        margin-top: 20px;
+        padding: 15px 17px;
+        background: #f7f8fa;
+        border: 1px solid #e9edf2;
+        border-radius: 10px;
+        color: #758092;
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+    @media (max-width: 600px) {
+        .sales-page {
+            padding: 28px 15px 50px;
+        }
+    }
+</style>
+
+<section class="sales-page">
+
+    <header class="sales-header">
+        <div class="sales-eyebrow">Member account</div>
+        <h1>My Sales</h1>
+        <p>
+            Track shares allocated to buyers, review payment submissions,
+            and confirm payments received directly from buyers.
+        </p>
+    </header>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="sales-note">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="sales-table-wrap">
+        {% if allocations %}
+            <table class="sales-table">
+                <thead>
+                    <tr>
+                        <th>Reference</th>
+                        <th>Buyer</th>
+                        <th>Shares</th>
+                        <th>Amount</th>
+                        <th>Package</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for allocation in allocations %}
+                        <tr>
+                            <td>
+                                <span class="transaction-reference">
+                                    {{ allocation.reference }}
+                                </span>
+                            </td>
+
+                            <td>
+                                <span class="buyer-name">
+                                    {{ allocation.buyer.username }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {{ allocation.shares }}
+                            </td>
+
+                            <td>
+                                <span class="amount">
+                                    KSh {{ allocation.amount|floatformat:2 }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {% if allocation.package %}
+                                    {{ allocation.package.days }} days
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {{ allocation.created_at|date:"d M Y" }}
+                            </td>
+
+                            <td>
+                                <span class="status status-{{ allocation.status }}">
+                                    {{ allocation.get_status_display|default:allocation.status }}
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="sales-actions">
+
+                                    {% if allocation.status == "submitted" %}
+                                        <form
+                                            method="post"
+                                            action="{% url 'confirm_payment' allocation.pk %}"
+                                            onsubmit="return confirm('Confirm that you have received this payment? This will transfer the shares to the buyer.');"
+                                        >
+                                            {% csrf_token %}
+                                            <button
+                                                type="submit"
+                                                class="action-button confirm-button"
+                                            >
+                                                Confirm payment
+                                            </button>
+                                        </form>
+
+                                        <form
+                                            method="post"
+                                            action="{% url 'raise_dispute' allocation.pk %}"
+                                            onsubmit="return confirm('Raise a dispute for this transaction?');"
+                                        >
+                                            {% csrf_token %}
+                                            <button
+                                                type="submit"
+                                                class="action-button dispute-button"
+                                            >
+                                                Dispute
+                                            </button>
+                                        </form>
+
+                                    {% elif allocation.status == "awaiting_payment" %}
+                                        <span class="no-action">
+                                            Awaiting buyer payment
+                                        </span>
+
+                                    {% elif allocation.status == "confirmed" %}
+                                        <span class="no-action">
+                                            Transfer completed
+                                        </span>
+
+                                    {% elif allocation.status == "disputed" %}
+                                        <span class="no-action">
+                                            Under dispute
+                                        </span>
+
+                                    {% else %}
+                                        <span class="no-action">
+                                            No action available
+                                        </span>
+                                    {% endif %}
+
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        {% else %}
+            <div class="empty-sales">
+                <h3>No sales yet</h3>
+                <p>
+                    When another member purchases your listed shares,
+                    the transaction will appear here.
+                </p>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="sales-note">
+        <strong>Payment confirmation:</strong>
+        Only confirm a transaction after independently checking that
+        the payment has reached your account. Confirming payment triggers
+        the share transfer and activates the buyer's new maturity period.
+        This prototype does not independently verify M-Pesa transactions.
+    </div>
+
+</section>
+
+{% endblock %}
