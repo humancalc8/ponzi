@@ -40,29 +40,51 @@ from .forms import (
 # HOME
 # ---------------------------------------------------------
 
+# ---------------------------------------------------------
+# HOME
+# ---------------------------------------------------------
+
 def home(request):
+    # Always display every released batch that still has shares,
+    # whether bidding is currently open or closed.
     batches = ShareBatch.objects.filter(
         status="released",
         available_shares__gt=0,
     ).order_by("-released_at")
 
+    # Calculate the total number of shares available across all batches.
     available_shares = batches.aggregate(
         total=Sum("available_shares")
     )["total"] or 0
 
+    # Find the currently open bidding session, if one exists.
     session = BiddingSession.objects.filter(
         status="open"
     ).order_by("opens_at").first()
 
-    packages = Package.objects.filter(active=True)
+    # Determine whether bidding is currently open.
+    session_is_open = (
+        session.is_open()
+        if session
+        else False
+    )
 
-    return render(request, "core/home.html", {
-        "batches": batches,
-        "available_shares": available_shares,
-        "session": session,
-        "session_is_open": session.is_open() if session else False,
-        "packages": packages,
-    })
+    # Retrieve active packages.
+    packages = Package.objects.filter(
+        active=True
+    )
+
+    return render(
+        request,
+        "core/home.html",
+        {
+            "batches": batches,
+            "available_shares": available_shares,
+            "session": session,
+            "session_is_open": session_is_open,
+            "packages": packages,
+        }
+    )
 
 
 # ---------------------------------------------------------
