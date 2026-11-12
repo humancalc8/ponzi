@@ -1,5 +1,6 @@
 
 from decimal import Decimal
+from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth import login
@@ -7,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Sum, F, ExpressionWrapper, DecimalField
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
@@ -20,6 +22,9 @@ from .models import (
     Allocation,
     PaymentEvidence,
     AuditLog,
+    ReferralProfile,
+    MemberReferral,
+    ReferralCommission,
     SHARE_PRICE,
 )
 
@@ -61,21 +66,55 @@ def home(request):
 
 
 # ---------------------------------------------------------
-# REGISTRATION
+# REGISTRATION AND REFERRALS
 # ---------------------------------------------------------
 
 def register(request):
-    form = RegisterForm(request.POST or None)
+    form = RegisterForm(
+        request.POST or None,
+        initial={
+            "referral_code": request.GET.get("ref", "").strip().upper()
+        },
+    )
 
     if request.method == "POST" and form.is_valid():
-        user = form.save()
-        login(request, user)
+        referral_code = form.cleaned_data.get("referral_code", "")
 
-        messages.success(
-            request,
-            "Your demo member account is ready."
-        )
-        return redirect("dashboard")
+        try:
+            with transaction.atomic():
+                user = form.save()
+
+                # Every member gets their own referral profile.
+                ReferralProfile.objects.get_or_create(user=user)
+
+                # Save the direct referral relationship, if a code was used.
+                if referral_code:
+                    referrer_profile = ReferralProfile.objects.select_for_update().get(
+                        referral_code=referral_code
+                    )
+
+                    if referrer_profile.user_id == user.pk:
+                        raise ValueError(
+                            "You cannot use your own referral code."
+                        )
+
+                    MemberReferral.objects.create(
+                        referrer=referrer_profile.user,
+                        referred_user=user,
+                        referral_code_used=referral_code,
+                    )
+
+            login(request, user)
+
+            messages.success(
+                request,
+                "Your member account is ready."
+            )
+
+            return redirect("dashboard")
+
+        except (ReferralProfile.DoesNotExist, ValueError) as error:
+            messages.error(request, str(error))
 
     return render(request, "core/register.html", {
         "form": form,
@@ -88,6 +127,13 @@ def register(request):
 
 @login_required
 def dashboard(request):
+
+    # Ensure existing members who registered before referrals
+    # were introduced also receive a referral profile.
+    referral_profile, _ = ReferralProfile.objects.get_or_create(
+        user=request.user
+    )
+
     holdings = Holding.objects.filter(
         owner=request.user
     ).order_by("-activated_at")
@@ -132,6 +178,37 @@ def dashboard(request):
         total=Sum("remaining_amount")
     )["total"] or Decimal("0.00")
 
+    # Referral information.
+    referrals = MemberReferral.objects.filter(
+        referrer=request.user
+    ).select_related(
+        "referred_user"
+    ).order_by("-created_at")
+
+    referral_commissions = ReferralCommission.objects.filter(
+        referral__referrer=request.user
+    ).select_related(
+        "referral",
+        "matured_holding",
+    ).order_by("-created_at")
+
+    pending_commission = referral_commissions.filter(
+        status="pending"
+    ).aggregate(
+        total=Sum("amount")
+    )["total"] or Decimal("0.00")
+
+    paid_commission = referral_commissions.filter(
+        status="paid"
+    ).aggregate(
+        total=Sum("amount")
+    )["total"] or Decimal("0.00")
+
+    referral_link = (
+        request.build_absolute_uri(reverse("register"))
+        + f"?ref={referral_profile.referral_code}"
+    )
+
     return render(request, "core/dashboard.html", {
         "holdings": holdings[:5],
         "listings": listings,
@@ -140,13 +217,22 @@ def dashboard(request):
         "active_shares": active_shares,
         "listed_shares": listed_shares,
         "allocation_count": allocations.count(),
+
+        # Referral dashboard data.
+        "referral_profile": referral_profile,
+        "referral_code": referral_profile.referral_code,
+        "referral_link": referral_link,
+        "referrals": referrals,
+        "referral_count": referrals.count(),
+        "referral_commissions": referral_commissions,
+        "pending_commission": pending_commission,
+        "paid_commission": paid_commission,
     })
 
 
 # ---------------------------------------------------------
 # PRIMARY MARKET: BUY FROM RELEASED SHARE BATCHES
 # ---------------------------------------------------------
-
 
 @login_required
 def buy_shares(request):
@@ -165,7 +251,10 @@ def buy_shares(request):
             package = form.cleaned_data["package"]
 
             if batch.status != "released":
-                messages.error(request, "This share batch is no longer available.")
+                messages.error(
+                    request,
+                    "This share batch is no longer available."
+                )
 
             elif shares > batch.available_shares:
                 messages.error(
@@ -174,8 +263,6 @@ def buy_shares(request):
                 )
 
             else:
-                # Store the selection temporarily.
-                # No shares are reserved at this stage.
                 request.session["pending_share_checkout"] = {
                     "batch_id": batch.pk,
                     "shares": shares,
@@ -190,25 +277,38 @@ def buy_shares(request):
         "session": session,
     })
 
+
+# ---------------------------------------------------------
+# PRIMARY MARKET CHECKOUT
+# ---------------------------------------------------------
+
 @login_required
 def share_checkout(request):
-    from django.utils import timezone
 
     pending = request.session.get("pending_share_checkout")
 
     if not pending:
         messages.error(request, "Please select your shares first.")
-        return redirect("buy_shares")
+        return redirect("buy")
 
     try:
         batch = ShareBatch.objects.get(pk=pending["batch_id"])
         package = Package.objects.get(pk=pending["package_id"])
         session = BiddingSession.objects.get(pk=pending["session_id"])
-    except (ShareBatch.DoesNotExist, Package.DoesNotExist,
-            BiddingSession.DoesNotExist, KeyError, TypeError):
+
+    except (
+        ShareBatch.DoesNotExist,
+        Package.DoesNotExist,
+        BiddingSession.DoesNotExist,
+        KeyError,
+        TypeError,
+    ):
         request.session.pop("pending_share_checkout", None)
-        messages.error(request, "Your checkout selection is no longer valid.")
-        return redirect("buy_shares")
+        messages.error(
+            request,
+            "Your checkout selection is no longer valid."
+        )
+        return redirect("buy")
 
     shares = int(pending["shares"])
     amount = Decimal(shares) * SHARE_PRICE
@@ -217,11 +317,19 @@ def share_checkout(request):
         phone = request.POST.get("phone", "").strip()
 
         if not phone:
-            messages.error(request, "Please enter your M-Pesa phone number.")
+            messages.error(
+                request,
+                "Please enter your M-Pesa phone number."
+            )
+
         elif not session.is_open():
-            messages.error(request, "This bidding session is no longer open.")
+            messages.error(
+                request,
+                "This bidding session is no longer open."
+            )
             request.session.pop("pending_share_checkout", None)
-            return redirect("buy_shares")
+            return redirect("buy")
+
         else:
             try:
                 with transaction.atomic():
@@ -230,7 +338,9 @@ def share_checkout(request):
                     )
 
                     if batch.status != "released":
-                        raise ValueError("This share batch is no longer available.")
+                        raise ValueError(
+                            "This share batch is no longer available."
+                        )
 
                     if shares > batch.available_shares:
                         raise ValueError(
@@ -238,7 +348,9 @@ def share_checkout(request):
                         )
 
                     batch.available_shares -= shares
-                    batch.save(update_fields=["available_shares"])
+                    batch.save(
+                        update_fields=["available_shares"]
+                    )
 
                     purchase = PurchaseRequest.objects.create(
                         buyer=request.user,
@@ -263,7 +375,10 @@ def share_checkout(request):
                         ),
                     )
 
-                request.session.pop("pending_share_checkout", None)
+                request.session.pop(
+                    "pending_share_checkout",
+                    None,
+                )
 
                 messages.success(
                     request,
@@ -330,9 +445,9 @@ def buy_from_member(request, pk):
         )
         return redirect("marketplace")
 
+    # The current SecondaryBuyForm does not accept a buyer argument.
     form = SecondaryBuyForm(
         request.POST or None,
-        buyer=request.user,
         initial={"listing": listing.pk},
     )
 
@@ -592,7 +707,7 @@ def submit_payment(request, pk):
 # ---------------------------------------------------------
 # CONFIRM PAYMENT AND TRANSFER OWNERSHIP
 # ---------------------------------------------------------
-from datetime import timedelta
+
 @login_required
 @require_POST
 def confirm_payment(request, pk):
@@ -662,7 +777,6 @@ def confirm_payment(request, pk):
                     "These shares have already been transferred."
                 )
 
-            # Calculate the seller's remaining cost basis and value.
             original_shares = seller_holding.shares
 
             seller_principal_per_share = (
@@ -681,9 +795,9 @@ def confirm_payment(request, pk):
                 seller_maturity_per_share * Decimal(allocation.shares)
             )
 
-            # Create the buyer's new holding.
             now = timezone.now()
             package = allocation.package
+
             buyer_principal = (
                 Decimal(allocation.shares)
                 * allocation.share_price_snapshot
@@ -704,12 +818,10 @@ def confirm_payment(request, pk):
                 rate_snapshot=package.rate,
                 days_snapshot=package.days,
                 activated_at=now,
-                
                 maturity_value=buyer_maturity_value,
                 status="active",
             )
 
-            # Deduct only the transferred quantity from the seller.
             seller_holding.shares -= allocation.shares
             seller_holding.principal -= principal_reduction
             seller_holding.maturity_value -= maturity_reduction
@@ -726,7 +838,6 @@ def confirm_payment(request, pk):
                 ]
             )
 
-            # Record completed payment and transfer.
             evidence.seller_confirmed = True
             evidence.save(update_fields=["seller_confirmed"])
 
@@ -829,4 +940,3 @@ def raise_dispute(request, pk):
         messages.error(request, str(error))
 
     return redirect("sold")
- 

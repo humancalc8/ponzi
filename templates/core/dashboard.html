@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block content %}
@@ -20,15 +21,15 @@
 .dash a{color:inherit}
 .dash :focus-visible{outline:2px solid var(--brass); outline-offset:3px}
 
-/* header */
+/* HEADER */
 .dash .top{display:flex; justify-content:space-between; align-items:flex-end; gap:24px; flex-wrap:wrap; margin-bottom:36px}
 .dash .top h1{font-size:clamp(30px,4vw,42px)}
 .dash .top p{margin-top:8px; color:var(--muted)}
 .dash .btn{display:inline-block; background:var(--green); color:#fff; font-weight:600; text-decoration:none;
-  padding:13px 24px; border-radius:6px; transition:background .2s}
+  padding:13px 24px; border-radius:6px; transition:background .2s; border:0; cursor:pointer; font:inherit}
 .dash .btn:hover{background:var(--green-2)}
 
-/* balance band: one strip, one emphasised figure */
+/* ACCOUNT SUMMARY */
 .dash .band{display:grid; grid-template-columns:1.4fr 1fr 1fr; background:var(--green); color:#fff; border-radius:10px; overflow:hidden}
 .dash .metric{padding:32px 36px}
 .dash .metric + .metric{border-left:1px solid rgba(255,255,255,.14)}
@@ -38,10 +39,10 @@
 .dash .metric small{font-size:13.5px; color:#C4C8D0}
 .dash .cur{font-size:.55em; color:#FFFFFF; margin-right:6px; letter-spacing:.02em}
 
-/* body */
+/* MAIN GRID */
 .dash .grid{display:grid; grid-template-columns:1.6fr 1fr; gap:32px; margin-top:32px; align-items:start}
-.dash .card{background:var(--white); border:1px solid var(--line); border-radius:10px}
-.dash .card-head{display:flex; justify-content:space-between; align-items:baseline; padding:24px 32px 18px}
+.dash .card{background:var(--white); border:1px solid var(--line); border-radius:10px; overflow:hidden}
+.dash .card-head{display:flex; justify-content:space-between; align-items:baseline; gap:15px; padding:24px 32px 18px}
 .dash .card-head h2{font-size:24px}
 .dash .card-head a{font-size:14.5px; color:var(--green); text-underline-offset:4px}
 
@@ -55,7 +56,7 @@
 .dash .empty p{color:var(--muted); max-width:40ch; margin:0 auto 18px}
 .dash .empty a{color:var(--green); font-weight:600; text-underline-offset:4px}
 
-/* quick actions */
+/* QUICK ACTIONS */
 .dash .actions h2{font-size:24px; padding:24px 28px 18px}
 .dash .action{display:flex; gap:16px; align-items:center; padding:18px 28px; border-top:1px solid var(--line);
   text-decoration:none; transition:background .15s}
@@ -66,11 +67,57 @@
 .dash .action b{display:block; font-weight:600}
 .dash .action small{display:block; color:var(--muted); font-size:13.5px; line-height:1.4}
 
+/* REFERRALS */
+.dash .referral-section{margin-top:32px}
+.dash .referral-intro{padding:26px 32px 22px}
+.dash .referral-intro h2{font-size:25px}
+.dash .referral-intro p{color:var(--muted); margin-top:8px; max-width:65ch}
+
+.dash .referral-link-wrap{padding:0 32px 28px}
+.dash .field-label{display:block; font-size:13px; font-weight:600; margin-bottom:8px}
+.dash .referral-link-box{display:flex; gap:10px}
+.dash .referral-link-box input{
+  flex:1; min-width:0; padding:13px 14px; border:1px solid var(--line);
+  border-radius:6px; background:#F8F9FA; color:var(--ink);
+  font:inherit; font-size:14px;
+}
+.dash .copy-btn{
+  border:0; border-radius:6px; padding:0 20px; background:var(--green);
+  color:#fff; font:inherit; font-weight:600; cursor:pointer;
+}
+.dash .copy-btn:hover{background:var(--green-2)}
+.dash .referral-code{display:inline-block; margin-top:12px; font-size:13px; color:var(--muted)}
+.dash .referral-code strong{color:var(--ink); letter-spacing:.08em}
+
+.dash .referral-stats{display:grid; grid-template-columns:repeat(3,1fr); border-top:1px solid var(--line)}
+.dash .ref-stat{padding:22px 28px}
+.dash .ref-stat + .ref-stat{border-left:1px solid var(--line)}
+.dash .ref-stat span{display:block; color:var(--muted); font-size:13px}
+.dash .ref-stat strong{display:block; margin-top:7px; font-family:var(--serif); font-size:27px; font-weight:500; line-height:1.2; font-variant-numeric:tabular-nums}
+
+.dash .status{display:inline-block; padding:4px 9px; border-radius:4px; background:#F0F1F3; color:#454B55; font-size:12px; font-weight:600}
+.dash .status.paid{background:#EAF3EC; color:#28613A}
+.dash .status.pending{background:#F7F1E6; color:#86611D}
+
+.dash .referral-note{padding:18px 32px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+.dash .commission-row{display:flex; justify-content:space-between; align-items:center; gap:15px; padding:17px 32px; border-top:1px solid var(--line)}
+.dash .commission-row b{display:block; font-weight:600}
+.dash .commission-row small{display:block; color:var(--muted); font-size:13px}
+.dash .commission-amount{text-align:right; white-space:nowrap; font-family:var(--serif); font-size:19px}
+
 @media (max-width:900px){
   .dash{padding:36px 20px 64px}
   .dash .band{grid-template-columns:1fr}
   .dash .metric + .metric{border-left:0; border-top:1px solid rgba(255,255,255,.14)}
   .dash .grid{grid-template-columns:1fr}
+}
+@media (max-width:600px){
+  .dash .referral-stats{grid-template-columns:1fr}
+  .dash .ref-stat + .ref-stat{border-left:0; border-top:1px solid var(--line)}
+  .dash .referral-link-box{flex-direction:column}
+  .dash .copy-btn{padding:13px}
+  .dash .referral-intro,.dash .referral-link-wrap{padding-left:20px; padding-right:20px}
+  .dash .commission-row{padding-left:20px; padding-right:20px}
 }
 @media (max-width:520px){
   .dash .row,.dash .card-head{padding-left:20px; padding-right:20px}
@@ -88,7 +135,7 @@
     <a class="btn" href="{% url 'buy' %}">Submit a bid</a>
   </header>
 
-  <!-- BALANCES -->
+  <!-- ACCOUNT SUMMARY -->
   <section class="band" aria-label="Account summary">
     <div class="metric">
       <span>Active holdings</span>
@@ -107,6 +154,67 @@
     </div>
   </section>
 
+  <!-- REFERRAL PROGRAM -->
+  <section class="card referral-section">
+
+    <div class="referral-intro">
+      <h2>Refer a member</h2>
+      <p>
+        Invite someone to join ShareFlow using your personal referral link.
+        When their first holding matures, you become eligible for a 2%
+        commission on its maturity value, paid separately by the company.
+      </p>
+    </div>
+
+    <div class="referral-link-wrap">
+      <label class="field-label" for="referralLink">Your personal referral link</label>
+
+      <div class="referral-link-box">
+        <input
+          type="text"
+          id="referralLink"
+          value="{{ referral_link }}"
+          readonly
+          aria-label="Your personal referral link"
+        >
+        <button
+          type="button"
+          class="copy-btn"
+          id="copyReferral"
+        >
+          Copy link
+        </button>
+      </div>
+
+      <div class="referral-code">
+        Referral code:
+        <strong>{{ referral_code }}</strong>
+      </div>
+    </div>
+
+    <div class="referral-stats">
+      <div class="ref-stat">
+        <span>Direct referrals</span>
+        <strong>{{ referral_count }}</strong>
+      </div>
+      <div class="ref-stat">
+        <span>Pending commission</span>
+        <strong>KSh {{ pending_commission|floatformat:2 }}</strong>
+      </div>
+      <div class="ref-stat">
+        <span>Paid commission</span>
+        <strong>KSh {{ paid_commission|floatformat:2 }}</strong>
+      </div>
+    </div>
+
+    <div class="referral-note">
+      Commission is calculated once, when a referred member's first holding
+      matures. Pending amounts are not yet company payments.
+    </div>
+
+  </section>
+
+  <!-- MAIN DASHBOARD GRID -->
   <div class="grid">
 
     <!-- RECENT HOLDINGS -->
@@ -119,8 +227,19 @@
       {% for h in holdings %}
         <div class="row">
           <div>
-            <b>{{ h.purchase.package.name }}</b>
-            <small>Ref {{ h.reference|truncatechars:18 }}, matures {{ h.maturity_at|date:"d M Y, H:i" }}</small>
+            <b>
+              {% if h.purchase_id %}
+                {{ h.purchase.package.name|default:"Share purchase" }}
+              {% elif h.source_allocation_id %}
+                Secondary market purchase
+              {% else %}
+                Share holding
+              {% endif %}
+            </b>
+            <small>
+              Ref {{ h.reference|truncatechars:18 }},
+              matures {{ h.maturity_at|date:"d M Y, H:i" }}
+            </small>
           </div>
           <div class="amt"><i>KSh</i>{{ h.maturity_value|floatformat:2 }}</div>
         </div>
@@ -137,22 +256,142 @@
       <h2>Quick actions</h2>
 
       <a class="action" href="{% url 'buy' %}">
-        <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg></span>
+        <span class="ico">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 8v8M8 12h8"/>
+          </svg>
+        </span>
         <span><b>Buy shares</b><small>Submit a request in an open session</small></span>
       </a>
 
       <a class="action" href="{% url 'bought' %}">
-        <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+        <span class="ico">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 7v5l3 2"/>
+          </svg>
+        </span>
         <span><b>Bought shares</b><small>Track maturity countdowns</small></span>
       </a>
 
       <a class="action" href="{% url 'sold' %}">
-        <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h14l-3-3M20 16H6l3 3"/></svg></span>
+        <span class="ico">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 8h14l-3-3M20 16H6l3 3"/>
+          </svg>
+        </span>
         <span><b>Sold shares</b><small>Review allocations and payments</small></span>
       </a>
     </section>
 
   </div>
+
+  <!-- REFERRAL HISTORY -->
+  <section class="card referral-section">
+
+    <div class="card-head">
+      <h2>Your referrals</h2>
+      <span>{{ referral_count }} member{{ referral_count|pluralize }}</span>
+    </div>
+
+    {% for referral in referrals %}
+      <div class="row">
+        <div>
+          <b>{{ referral.referred_user.username }}</b>
+          <small>Joined {{ referral.created_at|date:"d M Y" }}</small>
+        </div>
+        <div>
+          {% if referral.commission %}
+            <span class="status {{ referral.commission.status }}">
+              {{ referral.commission.get_status_display }}
+            </span>
+          {% else %}
+            <span class="status">Awaiting first maturity</span>
+          {% endif %}
+        </div>
+      </div>
+    {% empty %}
+      <div class="empty">
+        <p>You haven't referred anyone yet. Share your referral link to start building your direct referrals.</p>
+      </div>
+    {% endfor %}
+
+  </section>
+
+  <!-- COMMISSION HISTORY -->
+  <section class="card referral-section">
+
+    <div class="card-head">
+      <h2>Commission history</h2>
+    </div>
+
+    {% for commission in referral_commissions %}
+      <div class="commission-row">
+        <div>
+          <b>{{ commission.referral.referred_user.username }}</b>
+          <small>
+            First maturity · {{ commission.created_at|date:"d M Y" }}
+          </small>
+          <small>
+            Base: KSh {{ commission.base_amount|floatformat:2 }}
+          </small>
+        </div>
+
+        <div class="commission-amount">
+          KSh {{ commission.amount|floatformat:2 }}
+          <div>
+            <span class="status {{ commission.status }}">
+              {{ commission.get_status_display }}
+            </span>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="empty">
+        <p>Your referral commissions will appear here once an eligible referred member reaches their first maturity.</p>
+      </div>
+    {% endfor %}
+
+  </section>
+
 </div>
+
+<script>
+(function () {
+  const copyButton = document.getElementById("copyReferral");
+  const referralInput = document.getElementById("referralLink");
+
+  if (!copyButton || !referralInput) return;
+
+  copyButton.addEventListener("click", async function () {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(referralInput.value);
+      } else {
+        referralInput.focus();
+        referralInput.select();
+        referralInput.setSelectionRange(0, referralInput.value.length);
+
+        const copied = document.execCommand("copy");
+
+        if (!copied) {
+          throw new Error("Copy failed");
+        }
+      }
+
+      copyButton.textContent = "Copied";
+      setTimeout(() => {
+        copyButton.textContent = "Copy link";
+      }, 1800);
+
+    } catch (error) {
+      referralInput.focus();
+      referralInput.select();
+      copyButton.textContent = "Select and copy";
+    }
+  });
+})();
+</script>
 
 {% endblock %}
