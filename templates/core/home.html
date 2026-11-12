@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block content %}
@@ -18,7 +19,7 @@
 .hp :focus-visible{outline:2px solid var(--red); outline-offset:3px}
 .hp .num{font-variant-numeric:tabular-nums}
 
-/* ---------- intro ---------- */
+/* INTRO */
 .hp .intro{display:grid; grid-template-columns:1.1fr .9fr; gap:56px; align-items:center}
 .hp .art svg{width:100%; max-width:520px; height:auto; display:block; margin-left:auto; overflow:visible}
 .hp h1{font-size:clamp(42px,6vw,80px); letter-spacing:-.045em}
@@ -28,7 +29,7 @@
 .hp .btn:hover{background:#2D313B}
 .hp .quiet{font-weight:500; text-underline-offset:5px; text-decoration-thickness:1px}
 
-/* ---------- board ---------- */
+/* BOARD */
 .hp .board{margin-top:72px; border-top:3px solid var(--ink)}
 .hp .readout{display:grid; grid-template-columns:1fr 1fr 1.2fr; border-bottom:1px solid var(--line)}
 .hp .cell{padding:28px 32px 28px 0}
@@ -40,8 +41,8 @@
 .hp .clock i{font-style:normal; font-family:var(--display); font-size:34px; color:#B5B9C2; margin:0 2px}
 .hp .live{display:inline-flex; align-items:center; gap:8px; font-size:14px; font-weight:600}
 .hp .live::before{content:""; width:9px; height:9px; border-radius:50%; background:#A5AAB4}
-.hp .live.open::before{background:var(--red)}
-.hp .live.open{color:var(--red)}
+.hp .live.open::before{background:var(--green)}
+.hp .live.open{color:var(--green)}
 
 .hp .day{position:relative; height:132px; margin-top:8px}
 .hp .day .ticks{position:absolute; left:0; right:0; bottom:28px; height:14px;
@@ -58,19 +59,30 @@
 .hp .needle::before{content:""; position:absolute; top:-2px; left:-4px; width:10px; height:10px; border-radius:50%; background:var(--red)}
 .hp .board-note{margin-top:14px; font-size:14px; color:var(--muted)}
 
-/* ---------- shared section heads ---------- */
+/* SECTION HEADINGS */
 .hp .section{margin-top:128px}
 .hp .section h2,.hp .inventory h2{font-size:clamp(30px,4vw,48px); max-width:16ch}
 .hp .sec-head{display:grid; grid-template-columns:1fr 1fr; gap:48px; margin-bottom:44px; align-items:end}
 .hp .sec-head p{color:var(--muted); max-width:42ch}
 
-/* ---------- available share batches ---------- */
+/* SHARE INVENTORY */
 .hp .inventory{margin-top:128px}
 .hp .batch-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:24px}
-.hp .batch-card{position:relative; overflow:hidden; background:var(--paper); border:1px solid var(--line); border-radius:8px;
-  display:flex; flex-direction:column; transition:border-color .2s, transform .25s, box-shadow .25s}
-.hp .batch-card:hover{border-color:var(--ink); transform:translateY(-3px); box-shadow:0 18px 32px -22px rgba(21,23,28,.45)}
-.hp .batch-card::before{content:""; position:absolute; left:0; top:0; right:0; height:4px; background:var(--ink)}
+
+.hp .batch-card{
+  position:relative; overflow:hidden; background:var(--paper);
+  border:1px solid var(--line); border-radius:8px;
+  display:flex; flex-direction:column;
+  transition:border-color .2s, transform .25s, box-shadow .25s;
+}
+.hp .batch-card.open-card:hover{
+  border-color:var(--ink); transform:translateY(-3px);
+  box-shadow:0 18px 32px -22px rgba(21,23,28,.45);
+}
+.hp .batch-card::before{
+  content:""; position:absolute; left:0; top:0; right:0; height:4px;
+  background:var(--green);
+}
 .hp .batch-main{padding:28px 28px 26px; position:relative}
 .hp .batch-top{display:flex; justify-content:space-between; align-items:center; font-size:13.5px; margin-bottom:22px}
 .hp .batch-status{display:inline-flex; align-items:center; gap:8px; font-weight:600; color:var(--green)}
@@ -81,25 +93,55 @@
 .hp .batch-count{font-family:var(--display); font-weight:600; font-size:64px; line-height:1; letter-spacing:-.045em; margin-top:26px; font-variant-numeric:tabular-nums}
 .hp .batch-count-label{font-size:14px; color:var(--muted); margin-top:8px}
 
-/* ticket perforation */
+/* TICKET DETAILS */
 .hp .batch-details{position:relative; display:grid; grid-template-columns:1fr 1fr; gap:16px; padding:22px 28px 20px; border-top:2px dashed var(--line); margin-top:auto; background:#FAFAFB}
 .hp .batch-details::before,.hp .batch-details::after{content:""; position:absolute; top:-10px; width:18px; height:18px; border-radius:50%; background:var(--paper); border:1px solid var(--line)}
 .hp .batch-details::before{left:-10px}
 .hp .batch-details::after{right:-10px}
 .hp .batch-details span{display:block; font-size:13px; color:var(--muted); margin-bottom:4px}
 .hp .batch-details strong{font-family:var(--display); font-size:20px; font-weight:600; letter-spacing:-.02em; font-variant-numeric:tabular-nums}
-.hp .batch-cta{display:flex; justify-content:space-between; align-items:center; padding:16px 28px; border-top:1px solid var(--line);
-  font-weight:600; font-size:15px; text-decoration:none; transition:background .2s, color .2s}
+
+.hp .batch-cta{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:16px 28px; border-top:1px solid var(--line);
+  font-weight:600; font-size:15px; text-decoration:none;
+  transition:background .2s, color .2s;
+}
 .hp .batch-cta svg{width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; transition:transform .2s}
-.hp .batch-cta:hover{background:var(--ink); color:#fff}
-.hp .batch-cta:hover svg{transform:translateX(4px)}
+.hp .batch-card.open-card .batch-cta:hover{background:var(--ink); color:#fff}
+.hp .batch-card.open-card .batch-cta:hover svg{transform:translateX(4px)}
+
+/* CLOSED SESSION: FAINT BUT VISIBLE */
+.hp .batch-card.closed-card{
+  background:#F8F8F9;
+  border-color:#E5E6E9;
+}
+.hp .batch-card.closed-card::before{background:#C5C8CE}
+.hp .batch-card.closed-card .batch-main,
+.hp .batch-card.closed-card .batch-details,
+.hp .batch-card.closed-card .batch-cta{
+  opacity:.58;
+}
+.hp .batch-card.closed-card .batch-status{color:#737985}
+.hp .batch-card.closed-card .batch-status::before{background:#A5AAB4}
+.hp .batch-card.closed-card .batch-cta{
+  background:#F0F1F3;
+  color:#747985;
+  cursor:not-allowed;
+}
+.hp .batch-card.closed-card .batch-cta svg{opacity:.45}
+
+.hp .inventory-legend{display:flex; gap:24px; flex-wrap:wrap; margin-top:-24px; margin-bottom:28px; font-size:13px; color:var(--muted)}
+.hp .legend-item{display:inline-flex; align-items:center; gap:8px}
+.hp .legend-dot{width:9px; height:9px; border-radius:50%; background:#A5AAB4}
+.hp .legend-dot.available{background:var(--green)}
 
 .hp .empty-batches{display:flex; gap:24px; align-items:center; padding:36px 40px; border:1.5px dashed #BFC3CB; border-radius:8px; background:var(--soft)}
 .hp .empty-batches svg{flex:none; width:64px; height:64px}
 .hp .empty-batches h3{font-size:24px}
 .hp .empty-batches p{margin-top:6px; color:var(--muted); max-width:52ch}
 
-/* ---------- how it works ---------- */
+/* HOW IT WORKS */
 .hp .flow{border-top:1px solid var(--ink)}
 .hp .flow-step{display:grid; grid-template-columns:128px 1fr 1fr; gap:48px; align-items:center; padding:40px 0; border-bottom:1px solid var(--line)}
 .hp .ill{width:128px; height:128px; background:var(--soft); border-radius:10px; display:grid; place-items:center}
@@ -112,7 +154,7 @@
 .hp .flow-step li::before{content:""; position:absolute; left:6px; top:5px; width:6px; height:11px; border:solid var(--green); border-width:0 2px 2px 0; transform:rotate(45deg)}
 .hp .flow-step li b{font-weight:600}
 
-/* ---------- maturity ---------- */
+/* MATURITY */
 .hp .terms{border-top:1px solid var(--ink)}
 .hp .term{display:grid; grid-template-columns:120px 1fr 90px; gap:24px; align-items:center; padding:26px 0; border-bottom:1px solid var(--line)}
 .hp .term .d{font-family:var(--display); font-size:28px; font-weight:600; letter-spacing:-.03em}
@@ -122,7 +164,7 @@
 .hp .term .r{font-family:var(--display); font-size:34px; font-weight:600; letter-spacing:-.03em; text-align:right}
 .hp .terms-note{margin-top:14px; font-size:14px; color:var(--muted)}
 
-/* ---------- disclaimer ---------- */
+/* DISCLAIMER */
 .hp .fine{display:grid; grid-template-columns:180px 1fr; gap:24px; margin-top:128px; padding:28px 0 0; border-top:1px solid var(--ink); font-size:14.5px; color:var(--muted)}
 .hp .fine b{color:var(--ink); font-weight:600}
 .hp .fine p{max-width:78ch}
@@ -174,10 +216,8 @@
           <filter id="ds" x="-30%" y="-20%" width="160%" height="150%"><feDropShadow dx="0" dy="16" stdDeviation="12" flood-color="#15171C" flood-opacity=".28"/></filter>
           <g id="coin"><ellipse cx="0" cy="5" rx="22" ry="26" fill="#8E1710"/><ellipse rx="22" ry="26" fill="url(#coing)"/><ellipse rx="15" ry="19" fill="none" stroke="#8E1710" stroke-opacity=".5" stroke-width="2"/><text y="8" text-anchor="middle" font-size="22" font-weight="700" fill="#8E1710" font-family="Bricolage Grotesque,sans-serif">S</text></g>
         </defs>
-
         <circle cx="280" cy="250" r="236" fill="#F3F4F6"/>
         <path d="M150 150 Q280 -10 410 150" fill="none" stroke="#15171C" stroke-opacity=".25" stroke-width="1.5" stroke-dasharray="3 7"/>
-
         <g transform="translate(48 160) rotate(-5)" filter="url(#ds)">
           <rect x="-3" y="70" width="3" height="30" rx="1.5" fill="#2D313B"/>
           <rect width="150" height="290" rx="26" fill="url(#bez)"/>
@@ -193,7 +233,6 @@
           <rect x="22" y="226" width="106" height="32" rx="6" fill="#15171C"/>
           <text x="75" y="247" text-anchor="middle" font-size="13" font-weight="600" fill="#fff" font-family="Hanken Grotesk,sans-serif">Place bid</text>
         </g>
-
         <g transform="translate(364 160) rotate(5)" filter="url(#ds)">
           <rect x="-3" y="70" width="3" height="30" rx="1.5" fill="#2D313B"/>
           <rect width="150" height="290" rx="26" fill="url(#bez)"/>
@@ -207,7 +246,6 @@
           <rect x="22" y="232" width="106" height="30" rx="6" fill="#F0F1F3"/>
           <text x="75" y="251" text-anchor="middle" font-size="11.5" font-weight="600" fill="#15171C" font-family="Hanken Grotesk,sans-serif">View holdings</text>
         </g>
-
         <use href="#coin" transform="translate(150 128) rotate(-14) scale(.72)"/>
         <use href="#coin" transform="translate(205 78) rotate(-8) scale(.86)"/>
         <use href="#coin" transform="translate(280 52) scale(1.05)"/>
@@ -217,11 +255,9 @@
     </div>
   </section>
 
-
   <!-- BOARD -->
   <section class="board" aria-label="Today's bidding">
     <div class="readout">
-
       <div class="cell">
         <span>Shares available</span>
         <div class="big num">{{ available_shares|default:"0" }}</div>
@@ -247,7 +283,6 @@
         </div>
         <small>Hours, minutes and seconds to the next session</small>
       </div>
-
     </div>
 
     <div class="day" id="day" role="img" aria-label="Today in East Africa Time with sessions at 8 AM and 8 PM">
@@ -264,31 +299,34 @@
     <p class="board-note">Today in Nairobi (EAT). The red line is the current time.</p>
   </section>
 
-
   <!-- AVAILABLE SHARE BATCHES -->
   <section class="inventory" id="available-shares">
-
     <div class="sec-head">
       <h2>Shares currently available</h2>
-      <p>Browse the batches released by the administrator. Each share has a fixed value of KSh 70.</p>
+      <p>Browse released share batches. Each share has a fixed value of KSh 1. Batches remain visible when bidding sessions are closed.</p>
+    </div>
+
+    <div class="inventory-legend">
+      <span class="legend-item"><i class="legend-dot available"></i> Bidding open — available to bid</span>
+      <span class="legend-item"><i class="legend-dot"></i> Bidding closed — view only</span>
     </div>
 
     {% if batches %}
       <div class="batch-grid">
-
         {% for batch in batches %}
-          {% widthratio batch.available_shares 1 70 as batch_value %}
-          <article class="batch-card">
+          {% widthratio batch.available_shares 1 1 as batch_value %}
 
+          <article class="batch-card {% if session_is_open %}open-card{% else %}closed-card{% endif %}">
             <div class="batch-main">
               <div class="batch-top">
-                <span class="batch-status">Available</span>
+                <span class="batch-status">
+                  {% if session_is_open %}Available to bid{% else %}Available · Session closed{% endif %}
+                </span>
                 <span class="batch-reference">Batch #{{ batch.pk }}</span>
               </div>
 
               <h3>{{ batch.title }}</h3>
 
-              <!-- certificate stack -->
               <svg class="batch-visual" viewBox="0 0 64 64" aria-hidden="true">
                 <rect x="14" y="6" width="40" height="30" rx="3" fill="#E7E9ED"/>
                 <rect x="9" y="14" width="40" height="30" rx="3" fill="#fff" stroke="#15171C" stroke-width="2"/>
@@ -305,7 +343,7 @@
             <div class="batch-details">
               <div>
                 <span>Price per share</span>
-                <strong>KSh {{ batch.share_price|floatformat:"0g" }}</strong>
+                <strong>KSh {{ batch.share_price|floatformat:2 }}</strong>
               </div>
               <div>
                 <span>Available value</span>
@@ -313,18 +351,21 @@
               </div>
             </div>
 
-            <a class="batch-cta" href="{% url 'buy' %}">
-              <span>Bid on this batch</span>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-            </a>
-
+            {% if session_is_open %}
+              <a class="batch-cta" href="{% url 'buy' %}">
+                <span>Bid on this batch</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </a>
+            {% else %}
+              <div class="batch-cta" aria-disabled="true">
+                <span>Bidding opens at the next session</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </div>
+            {% endif %}
           </article>
         {% endfor %}
-
       </div>
-
     {% else %}
-
       <div class="empty-batches">
         <svg viewBox="0 0 64 64" aria-hidden="true">
           <path d="M8 36l8-18h32l8 18v14a3 3 0 0 1-3 3H11a3 3 0 0 1-3-3z" fill="#fff" stroke="#15171C" stroke-width="2.5" stroke-linejoin="round"/>
@@ -336,11 +377,8 @@
           <p>There are no released share batches with available quantities at the moment. Please check again later.</p>
         </div>
       </div>
-
     {% endif %}
-
   </section>
-
 
   <!-- HOW IT WORKS -->
   <section class="section">
@@ -350,8 +388,6 @@
     </div>
 
     <div class="flow">
-
-      <!-- 1 BID -->
       <article class="flow-step">
         <div class="ill">
           <svg viewBox="0 0 112 112" aria-hidden="true">
@@ -373,7 +409,6 @@
         </ul>
       </article>
 
-      <!-- 2 HOLD -->
       <article class="flow-step">
         <div class="ill">
           <svg viewBox="0 0 112 112" aria-hidden="true">
@@ -397,13 +432,12 @@
         </ul>
       </article>
 
-      <!-- 3 LIST -->
       <article class="flow-step">
         <div class="ill">
           <svg viewBox="0 0 112 112" aria-hidden="true">
             <path d="M24 62L56 30h34a5 5 0 0 1 5 5v34L63 101a7 7 0 0 1-9.9 0L24 71.900a7 7 0 0 1 0-9.900z" fill="#fff" stroke="#15171C" stroke-width="2.5" stroke-linejoin="round"/>
             <circle cx="79" cy="46" r="6" fill="#D9261C"/>
-            <text x="58" y="72" transform="rotate(-45 58 72)" text-anchor="middle" font-size="13" font-weight="700" fill="#15171C" font-family="Bricolage Grotesque,sans-serif">KSh 70</text>
+            <text x="58" y="72" transform="rotate(-45 58 72)" text-anchor="middle" font-size="13" font-weight="700" fill="#15171C" font-family="Bricolage Grotesque,sans-serif">KSh 1</text>
           </svg>
         </div>
         <div>
@@ -418,7 +452,6 @@
         </ul>
       </article>
 
-      <!-- 4 CONFIRM -->
       <article class="flow-step">
         <div class="ill">
           <svg viewBox="0 0 112 112" aria-hidden="true">
@@ -442,10 +475,8 @@
           <li><b>Review the allocation</b> under Sold shares and Transactions.</li>
         </ul>
       </article>
-
     </div>
   </section>
-
 
   <!-- MATURITY CLASSES -->
   <section class="section">
@@ -462,15 +493,11 @@
     <p class="terms-note">Rates are proposed per maturity term. They are not guaranteed.</p>
   </section>
 
-
-
   <div class="tail"></div>
 </div>
 
-
 <script>
 (function () {
-
     const timezone = "Africa/Nairobi";
 
     const hoursElement = document.getElementById("timer-hours");
@@ -483,70 +510,104 @@
     const needle = document.getElementById("needle");
     const needleLabel = document.getElementById("needle-label");
 
-    if (!hoursElement || !minutesElement || !secondsElement) { return; }
+    if (!hoursElement || !minutesElement || !secondsElement) return;
 
-    // Current date and time in Nairobi.
     function getNairobiTime() {
         const parts = new Intl.DateTimeFormat("en-GB", {
-            timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit",
-            hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23"
+            timeZone: timezone,
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hourCycle: "h23"
         }).formatToParts(new Date());
+
         const result = {};
-        parts.forEach(function (p) { if (p.type !== "literal") { result[p.type] = Number(p.value); } });
+        parts.forEach(function (part) {
+            if (part.type !== "literal") result[part.type] = Number(part.value);
+        });
         return result;
     }
 
-    // Next 8 AM or 8 PM Nairobi session.
     function getNextSession(local) {
         let targetHour;
-        let targetDay = new Date(Date.UTC(local.year, local.month - 1, local.day));
+        const targetDay = new Date(Date.UTC(local.year, local.month - 1, local.day));
 
-        if (local.hour < 8) { targetHour = 8; }
-        else if (local.hour < 20) { targetHour = 20; }
-        else { targetHour = 8; targetDay.setUTCDate(targetDay.getUTCDate() + 1); }
+        if (local.hour < 8) {
+            targetHour = 8;
+        } else if (local.hour < 20) {
+            targetHour = 20;
+        } else {
+            targetHour = 8;
+            targetDay.setUTCDate(targetDay.getUTCDate() + 1);
+        }
 
         const targetDate = new Date(Date.UTC(
-            targetDay.getUTCFullYear(), targetDay.getUTCMonth(), targetDay.getUTCDate(), targetHour, 0, 0
+            targetDay.getUTCFullYear(),
+            targetDay.getUTCMonth(),
+            targetDay.getUTCDate(),
+            targetHour,
+            0,
+            0
         ));
-        // Nairobi uses UTC+3.
-        return { time: targetDate.getTime() - (3 * 60 * 60 * 1000), hour: targetHour };
+
+        return {
+            time: targetDate.getTime() - (3 * 60 * 60 * 1000),
+            hour: targetHour
+        };
     }
 
-    function pad(n) { return String(n).padStart(2, "0"); }
+    function pad(number) {
+        return String(number).padStart(2, "0");
+    }
 
     function update() {
         const local = getNairobiTime();
         const session = getNextSession(local);
 
         let diff = Math.max(0, Math.floor((session.time - Date.now()) / 1000));
-        const h = Math.floor(diff / 3600); diff %= 3600;
-        const m = Math.floor(diff / 60), s = diff % 60;
+
+        const h = Math.floor(diff / 3600);
+        diff %= 3600;
+        const m = Math.floor(diff / 60);
+        const s = diff % 60;
 
         hoursElement.textContent = pad(h);
         minutesElement.textContent = pad(m);
         secondsElement.textContent = pad(s);
 
-        labelElement.textContent = session.hour === 8 ? "Next: morning session" : "Next: evening session";
+        labelElement.textContent = session.hour === 8
+            ? "Next: morning session"
+            : "Next: evening session";
+
         timeElement.textContent = session.hour === 8 ? "8:00 AM" : "8:00 PM";
 
         const sessionDate = new Intl.DateTimeFormat("en-GB", {
-            timeZone: timezone, weekday: "long", day: "numeric", month: "long"
+            timeZone: timezone,
+            weekday: "long",
+            day: "numeric",
+            month: "long"
         }).format(new Date(session.time));
+
         footerElement.textContent = sessionDate + ", East Africa Time";
 
-        // Move the "now" line along the 24-hour strip.
         if (needle) {
-            const frac = (local.hour + local.minute / 60 + local.second / 3600) / 24;
-            needle.style.left = (frac * 100).toFixed(3) + "%";
+            const fraction = (
+                local.hour + local.minute / 60 + local.second / 3600
+            ) / 24;
+
+            needle.style.left = (fraction * 100).toFixed(3) + "%";
             needleLabel.textContent = "Now " + pad(local.hour) + ":" + pad(local.minute);
-            needleLabel.style.left = frac > 0.88 ? "auto" : "8px";
-            needleLabel.style.right = frac > 0.88 ? "8px" : "auto";
+
+            needleLabel.style.left = fraction > 0.88 ? "auto" : "8px";
+            needleLabel.style.right = fraction > 0.88 ? "8px" : "auto";
         }
     }
 
     update();
     setInterval(update, 1000);
-
 })();
 </script>
 
